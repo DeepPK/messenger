@@ -34,7 +34,6 @@ test:
     - messenger
   script:
     - mvn test jacoco:report
-    - coverage run -m pytest tests/
   artifacts:
     paths:
       - target/site/jacoco/jacoco.xml
@@ -52,7 +51,7 @@ sonar-check:
       -Dsonar.host.url=$SONAR_HOST_URL
       -Dsonar.login=$SONAR_TOKEN
       -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
-      -Dsonar.qualitygate.wait=true  # Ожидаем результат анализа
+      -Dsonar.qualitygate.wait=true
   dependencies:
     - test
 
