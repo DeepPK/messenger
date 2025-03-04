@@ -25,6 +25,11 @@ sonarcloud-check:
       - .sonar/cache
   script:
     - mvn verify sonar:sonar -Dsonar.projectKey=DeepPK_messenger
+    - sonar-scanner
+    - Dsonar.projectKey=DeepPK_messenger
+    - Dsonar.host.url=$SONAR_HOST_URL
+    - Dsonar.login=$SONAR_TOKEN
+    - Dsonar.qualitygate.wait=true
   only:
     - merge_requests
     - master
