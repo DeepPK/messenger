@@ -41,27 +41,20 @@ test:
     reports:
       junit: target/surefire-reports/*.xml
 
-sonarcloud-check:
+sonar-check:
   image: maven:3-openjdk-17
   stage: sonar-check
   tags:
     - messenger
-  cache:
-    key: "${CI_JOB_NAME}"
-    paths:
-    scripts:  
-      - mvn sonar:sonar 
-        -Dsonar.projectKey=$SONAR_PROJECT_KEY
-        -Dsonar.host.url=$SONAR_HOST_URL
-        -Dsonar.login=$SONAR_TOKEN
-        -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
-        -Dsonar.qualitygate.wait=true  # Ожидаем результат анализа
+  script:
+    - mvn sonar:sonar 
+      -Dsonar.projectKey=$SONAR_PROJECT_KEY
+      -Dsonar.host.url=$SONAR_HOST_URL
+      -Dsonar.login=$SONAR_TOKEN
+      -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+      -Dsonar.qualitygate.wait=true  # Ожидаем результат анализа
   dependencies:
     - test
-  only:
-    - merge_requests
-    - master
-    - develop
 
 check-metrics:
   image: curlimages/curl:latesе
