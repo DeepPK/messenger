@@ -58,7 +58,7 @@ sonar-check:
     - test
 
 check-metrics:
-  image: curlimages/curl:latesе
+  image: curlimages/curl:latest
   stage: quality-check
   tags:
     - messenger
