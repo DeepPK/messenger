@@ -60,6 +60,8 @@ sonar-check:
 check-metrics:
   image: curlimages/curl:latesе
   stage: quality-check
+  tags:
+    - messenger
   script:
     - |
       while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
