@@ -10,6 +10,7 @@ variables:
   SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
   GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
   SONAR_PROJECT_KEY: "DeepPK_messenger"
+  MAX_ATTEMPTS: "10"
 
 cache:
   key: maven
@@ -42,7 +43,7 @@ test:
       junit: target/surefire-reports/*.xml
 
 sonar-check:
-  image: maven:3-openjdk-17
+  image: maven:3-openjdk-18
   stage: sonar-check
   tags:
     - messenger
@@ -63,9 +64,14 @@ check-metrics:
   tags:
     - messenger
   script:
+    - sleep 30
     - |
+      ATTEMPT=0
+      MAX_ATTEMPTS=${MAX_ATTEMPTS:-10}
+      PROJECT_KEY="$SONAR_PROJECT_KEY"
+
       while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
-        STATUS=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST_URL/api/qualitygates/project_status?projectKey=$PROJECT_KEY" | jq -r '.projectStatus.status')
+        STATUS=$(curl -s -u "$SONAR_TOKEN": "$SONAR_HOST_URL/api/qualitygates/project_status?projectKey=$PROJECT_KEY" | jq -r '.projectStatus.status')
         
         if [ "$STATUS" = "OK" ]; then
           echo "Quality Gate passed"
@@ -79,17 +85,22 @@ check-metrics:
         ATTEMPT=$((ATTEMPT+1))
       done
 
-      # Проверка покрытия кода
-      COVERAGE=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST_URL/api/measures/component?component=$PROJECT_KEY&metricKeys=coverage" | jq -r '.component.measures[0].value')
-      if [ "$(echo "$COVERAGE < 80" | bc -l)" -eq 1 ]; then
+      if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+        echo "Timeout waiting for Quality Gate"
+        exit 1
+      fi
+
+      COVERAGE=$(curl -s -u "$SONAR_TOKEN": "$SONAR_HOST_URL/api/measures/component?component=$PROJECT_KEY&metricKeys=coverage" | jq -r '.component.measures[0].value')
+      if [ "$COVERAGE" = "null" ]; then
+        echo "Coverage data unavailable"
+        exit 1
+      elif [ $(echo "$COVERAGE < 80" | bc) -eq 1 ]; then
         echo "Code coverage $COVERAGE% < 80%"
         exit 1
       fi
 
-      # Проверка критических ошибок
-      CRITICAL_ISSUES=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST_URL/api/issues/search?componentKeys=$PROJECT_KEY&severities=CRITICAL" | jq -r '.total')
+      CRITICAL_ISSUES=$(curl -s -u "$SONAR_TOKEN": "$SONAR_HOST_URL/api/issues/search?componentKeys=$PROJECT_KEY&severities=CRITICAL" | jq -r '.total')
       if [ "$CRITICAL_ISSUES" -gt 0 ]; then
         echo "Found $CRITICAL_ISSUES critical issues"
         exit 1
       fi
-
