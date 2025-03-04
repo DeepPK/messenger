@@ -40,7 +40,6 @@ sonarcloud-check:
       - coverage.xml
 
 check-metrics:
-  image: maven:3-openjdk-17
   stage: quality-check
   script:
     - apt-get update && apt-get install -y jq
@@ -86,9 +85,13 @@ test:
   tags:
     - messenger
   script:
+    - apt-get update && apt-get install -y python3 python3-pip
+    - pip3 install coverage pytest
     - mvn $MAVEN_CLI_OPTS test
     - coverage run -m pytest tests/
     - coverage xml  
   artifacts:
+    paths:
+      - coverage.xml
     reports:
       junit: target/surefire-reports/*.xml
