@@ -2,6 +2,7 @@ stages:
   - build
   - test
   - sonar-check
+  - quality-check
 
 variables:
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
@@ -29,11 +30,43 @@ sonarcloud-check:
     - Dsonar.projectKey=DeepPK_messenger
     - Dsonar.host.url=$SONAR_HOST_URL
     - Dsonar.login=$SONAR_TOKEN
-    - Dsonar.qualitygate.wait=true
+    - Dsonar.coverageReportPaths=path/to/coverage/report.xml
   only:
     - merge_requests
     - master
     - develop
+  artifacts:
+    paths:
+      - coverage.xml
+
+check-metrics:
+  image: maven:3-openjdk-17
+  stage: quality-check
+  script:
+    - apt-get update && apt-get install -y jq
+    - |
+      # Получаем ID последнего анализа
+      ANALYSIS_ID=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST_URL/api/project_analyses/search?project=my_project" | jq -r '.analyses[0].key')
+      
+      COVERAGE=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST_URL/api/measures/component?component=my_project&metricKeys=coverage" | jq -r '.component.measures[0].value')
+      echo "Покрытие кода: $COVERAGE%"
+      if [ $(echo "$COVERAGE < 80" | bc) -eq 1 ]; then
+        echo "Ошибка: Покрытие кода меньше 80%"
+        exit 1
+      fi
+
+      TEST_SUCCESS=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST_URL/api/measures/component?component=my_project&metricKeys=test_success_density" | jq -r '.component.measures[0].value')
+      echo "Тесты пройдены на: $TEST_SUCCESS%"
+      if [ $(echo "$TEST_SUCCESS < 100" | bc) -eq 1 ]; then
+        echo "Ошибка: Тесты провалены"
+        exit 1
+      fi
+
+      CRITICAL_ISSUES=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST_URL/api/issues/search?componentKeys=my_project&severities=CRITICAL" | jq -r '.total')
+      if [ "$CRITICAL_ISSUES" -gt 0 ]; then
+        echo "Ошибка: Найдено $CRITICAL_ISSUES критических проблем"
+        exit 1
+      fi
 
 build:
   image: maven:3.8.6-openjdk-18
@@ -54,6 +87,8 @@ test:
     - messenger
   script:
     - mvn $MAVEN_CLI_OPTS test
+    - coverage run -m pytest tests/
+    - coverage xml  
   artifacts:
     reports:
       junit: target/surefire-reports/*.xml
