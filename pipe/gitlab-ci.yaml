@@ -15,58 +15,6 @@ cache:
   paths:
     - .m2/repository
 
-sonarcloud-check:
-  image: maven:3-openjdk-17
-  stage: sonar-check
-  tags:
-    - messenger
-  cache:
-    key: "${CI_JOB_NAME}"
-    paths:
-      - .sonar/cache
-  script:
-    - mvn verify sonar:sonar -Dsonar.projectKey=DeepPK_messenger
-    - sonar-scanner
-    - Dsonar.projectKey=DeepPK_messenger
-    - Dsonar.host.url=$SONAR_HOST_URL
-    - Dsonar.login=$SONAR_TOKEN
-    - Dsonar.coverageReportPaths=path/to/coverage/report.xml
-  only:
-    - merge_requests
-    - master
-    - develop
-  artifacts:
-    paths:
-      - coverage.xml
-
-check-metrics:
-  stage: quality-check
-  script:
-    - apt-get update && apt-get install -y jq
-    - |
-      # Получаем ID последнего анализа
-      ANALYSIS_ID=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST_URL/api/project_analyses/search?project=my_project" | jq -r '.analyses[0].key')
-      
-      COVERAGE=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST_URL/api/measures/component?component=my_project&metricKeys=coverage" | jq -r '.component.measures[0].value')
-      echo "Покрытие кода: $COVERAGE%"
-      if [ $(echo "$COVERAGE < 80" | bc) -eq 1 ]; then
-        echo "Ошибка: Покрытие кода меньше 80%"
-        exit 1
-      fi
-
-      TEST_SUCCESS=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST_URL/api/measures/component?component=my_project&metricKeys=test_success_density" | jq -r '.component.measures[0].value')
-      echo "Тесты пройдены на: $TEST_SUCCESS%"
-      if [ $(echo "$TEST_SUCCESS < 100" | bc) -eq 1 ]; then
-        echo "Ошибка: Тесты провалены"
-        exit 1
-      fi
-
-      CRITICAL_ISSUES=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST_URL/api/issues/search?componentKeys=my_project&severities=CRITICAL" | jq -r '.total')
-      if [ "$CRITICAL_ISSUES" -gt 0 ]; then
-        echo "Ошибка: Найдено $CRITICAL_ISSUES критических проблем"
-        exit 1
-      fi
-
 build:
   image: maven:3.8.6-openjdk-18
   stage: build
@@ -85,13 +33,68 @@ test:
   tags:
     - messenger
   script:
-    - apt-get update && apt-get install -y python3 python3-pip
-    - pip3 install coverage pytest
-    - mvn $MAVEN_CLI_OPTS test
+    - mvn test jacoco:report
     - coverage run -m pytest tests/
-    - coverage xml  
   artifacts:
     paths:
-      - coverage.xml
+      - target/site/jacoco/jacoco.xml
     reports:
       junit: target/surefire-reports/*.xml
+
+sonarcloud-check:
+  image: maven:3-openjdk-17
+  stage: sonar-check
+  tags:
+    - messenger
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+    scripts:  
+      - .sonar/cache
+      - mvn sonar:sonar 
+        -Dsonar.projectKey=$SONAR_PROJECT_KEY
+        -Dsonar.host.url=$SONAR_HOST_URL
+        -Dsonar.login=$SONAR_TOKEN
+        -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+        -Dsonar.qualitygate.wait=true  # Ожидаем результат анализа
+  dependencies:
+    - test
+  only:
+    - merge_requests
+    - master
+    - develop
+
+check-metrics:
+  image: curlimages/curl:latesе
+  stage: quality-check
+  script:
+    - |
+      while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+        STATUS=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST_URL/api/qualitygates/project_status?projectKey=$PROJECT_KEY" | jq -r '.projectStatus.status')
+        
+        if [ "$STATUS" = "OK" ]; then
+          echo "Quality Gate passed"
+          break
+        elif [ "$STATUS" = "ERROR" ]; then
+          echo "Quality Gate failed"
+          exit 1
+        fi
+
+        sleep 30
+        ATTEMPT=$((ATTEMPT+1))
+      done
+
+      # Проверка покрытия кода
+      COVERAGE=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST_URL/api/measures/component?component=$PROJECT_KEY&metricKeys=coverage" | jq -r '.component.measures[0].value')
+      if [ $(echo "$COVERAGE < 80" | bc) -eq 1 ]; then
+        echo "Code coverage $COVERAGE% < 80%"
+        exit 1
+      fi
+
+      # Проверка критических ошибок
+      CRITICAL_ISSUES=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST_URL/api/issues/search?componentKeys=$PROJECT_KEY&severities=CRITICAL" | jq -r '.total')
+      if [ "$CRITICAL_ISSUES" -gt 0 ]; then
+        echo "Found $CRITICAL_ISSUES critical issues"
+        exit 1
+      fi
+
