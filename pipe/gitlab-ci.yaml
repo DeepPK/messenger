@@ -81,7 +81,7 @@ check-metrics:
 
       # Проверка покрытия кода
       COVERAGE=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST_URL/api/measures/component?component=$PROJECT_KEY&metricKeys=coverage" | jq -r '.component.measures[0].value')
-      if [ $(echo "$COVERAGE < 80" | bc) -eq 1 ]; then
+      if [ "$(echo "$COVERAGE < 80" | bc -l)" -eq 1 ]; then
         echo "Code coverage $COVERAGE% < 80%"
         exit 1
       fi
