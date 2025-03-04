@@ -9,6 +9,7 @@ variables:
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
   SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
   GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+  SONAR_PROJECT_KEY: "DeepPK_messenger"
 
 cache:
   key: maven
@@ -46,6 +47,7 @@ sonar-check:
   tags:
     - messenger
   script:
+    - mvn clean install
     - mvn sonar:sonar 
       -Dsonar.projectKey=$SONAR_PROJECT_KEY
       -Dsonar.host.url=$SONAR_HOST_URL
