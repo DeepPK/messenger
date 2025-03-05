@@ -35,6 +35,7 @@ test:
   tags:
     - messenger
   script:
+    - mvn $MAVEN_CLI_OPTS test
     - mvn test jacoco:report
   artifacts:
     paths:
