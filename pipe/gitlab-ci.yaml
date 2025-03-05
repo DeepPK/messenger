@@ -50,7 +50,7 @@ sonar-check:
     - messenger
   script:
     - mvn clean install
-    - mvn sonar:sonar 
+    - mvn sonar:sonar
       -Dsonar.tests=src/test/java/ru/khkhlv
       -Dsonar.projectKey=$SONAR_PROJECT_KEY
       -Dsonar.host.url=$SONAR_HOST_URL
@@ -74,7 +74,7 @@ check-metrics:
 
       while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
         STATUS=$(curl -s -u "$SONAR_TOKEN": "$SONAR_HOST_URL/api/qualitygates/project_status?projectKey=$PROJECT_KEY" | jq -r '.projectStatus.status')
-        
+      
         if [ "$STATUS" = "OK" ]; then
           echo "Quality Gate passed"
           break

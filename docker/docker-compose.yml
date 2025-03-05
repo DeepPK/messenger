@@ -1,10 +1,11 @@
 version: '3.8'
 
 services:
-  simple-messenger:
+  messenger_back:
+    container_name: backend
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile.back
     networks:
       - messenger-network
     ports:
@@ -13,6 +14,33 @@ services:
       spring.datasource.url: "jdbc:postgresql://messenger-db:5432/messenger_db"
       spring.datasource.username: "postgres"
       spring.datasource.password: "postgres"
+
+  app:
+    container_name: frontend
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.front
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    networks:
+      - messenger-network
+
+
+  bot:
+    container_name: bot
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.bot
+    networks:
+      - messenger-network
+    environment:
+      - TOKEN=7537054107:AAHwkBopAiYR0fleIogFq57wC2_Se5CxX5s
+      - BACKEND_URL=http://backend:8080
 
   messenger-db:
     container_name: messenger-db
