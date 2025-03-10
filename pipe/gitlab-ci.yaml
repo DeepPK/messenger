@@ -70,11 +70,12 @@ sonar-check:
     - test
 
 check-metrics:
-  image: praqma/network-multitool:latest
+  image: alpine:latest
   stage: quality-check
   tags:
     - messenger
   script:
+    - apk update && apk add curl jq
     - sleep 30
     - |
       ATTEMPT=0
