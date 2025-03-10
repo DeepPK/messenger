@@ -48,8 +48,6 @@ sonar-check:
   stage: sonar-check
   tags:
     - messenger
-  variables:
-    SONAR_HOST_URL: "http://host.docker.internal:9000"
   cache:
     policy: pull-push
     key: "sonar-cache-$CI_COMMIT_REF_SLUG"
