@@ -68,6 +68,8 @@ sonar-check:
   allow_failure: true
   dependencies:
     - test
+  only:
+    - master
 
 check-metrics:
   image: alpine:latest
