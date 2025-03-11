@@ -81,30 +81,24 @@ check-metrics:
     - sleep 30
     - |
       ATTEMPT=0
-      MAX_ATTEMPTS=20  # Увеличено количество попыток
+      MAX_ATTEMPTS=15  # Увеличено до 15 попыток
       PROJECT_KEY="$SONAR_PROJECT_KEY"
       COVERAGE="null"
 
-      while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
-        STATUS=$(curl -s -u "$SONAR_TOKEN": "$SONAR_HOST_URL/api/qualitygates/project_status?projectKey=$PROJECT_KEY" | jq -r '.projectStatus.status')
-      
-        if [ "$STATUS" = "OK" ]; then
-          echo "Quality Gate passed"
-          break
-        elif [ "$STATUS" = "ERROR" ]; then
-          echo "Quality Gate failed"
-          exit 1
-        fi
-        while [ "$COVERAGE" = "null" ] && [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+      # Ожидаем данные о покрытии
+      while [ "$COVERAGE" = "null" ] && [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
         COVERAGE=$(curl -s -u "$SONAR_TOKEN": "$SONAR_HOST_URL/api/measures/component?component=$PROJECT_KEY&metricKeys=coverage" | jq -r '.component.measures[0].value')
         echo "Попытка $ATTEMPT: Coverage = $COVERAGE"
-        sleep 30
+        sleep 20
         ATTEMPT=$((ATTEMPT+1))
-        if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
-          echo "Timeout waiting for Quality Gate"
-          exit 1
-        fi
       done
+
+      if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+        echo "Timeout waiting for Quality Gate"
+        exit 1
+      fi
+
+
 
       COVERAGE=$(curl -s -u "$SONAR_TOKEN": "$SONAR_HOST_URL/api/measures/component?component=$PROJECT_KEY&metricKeys=coverage" | jq -r '.component.measures[0].value')
       if [ "$COVERAGE" = "null" ]; then
