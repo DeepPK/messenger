@@ -40,7 +40,6 @@ test:
   artifacts:
     paths:
       - target/site/jacoco/jacoco.xml
-      - target/surefire-reports/*.xml
     reports:
       junit: target/surefire-reports/*.xml
 
