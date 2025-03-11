@@ -99,14 +99,12 @@ check-metrics:
         COVERAGE=$(curl -s -u "$SONAR_TOKEN": "$SONAR_HOST_URL/api/measures/component?component=$PROJECT_KEY&metricKeys=coverage" | jq -r '.component.measures[0].value')
         echo "Попытка $ATTEMPT: Coverage = $COVERAGE"
         sleep 30
-
         ATTEMPT=$((ATTEMPT+1))
+        if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+          echo "Timeout waiting for Quality Gate"
+          exit 1
+        fi
       done
-
-      if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
-        echo "Timeout waiting for Quality Gate"
-        exit 1
-      fi
 
       COVERAGE=$(curl -s -u "$SONAR_TOKEN": "$SONAR_HOST_URL/api/measures/component?component=$PROJECT_KEY&metricKeys=coverage" | jq -r '.component.measures[0].value')
       if [ "$COVERAGE" = "null" ]; then
