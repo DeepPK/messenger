@@ -86,25 +86,26 @@ check-metrics:
       COVERAGE="null"
 
       # Ожидаем данные о покрытии
-      while [ "$COVERAGE" = "null" ] && [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
-        COVERAGE=$(curl -s -u "$SONAR_TOKEN": "$SONAR_HOST_URL/api/measures/component?component=$PROJECT_KEY&metricKeys=coverage" | jq -r '.component.measures[0].value')
-        echo "Попытка $ATTEMPT: Coverage = $COVERAGE"
-        sleep 20
+       while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+        RESPONSE=$(curl -s -u "$SONAR_TOKEN": "$SONAR_URL")
+        COVERAGE=$(echo "$RESPONSE" | jq -r '.component.measures[0].value')
+        
+        if [ "$COVERAGE" != "null" ]; then
+          echo "Coverage received: $COVERAGE%"
+          break
+        fi
+        
+        echo "Waiting for coverage data... (attempt $((ATTEMPT+1))"
+        sleep 15
         ATTEMPT=$((ATTEMPT+1))
       done
 
-      if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
-        echo "Timeout waiting for Quality Gate"
+      if [ "$COVERAGE" = "null" ]; then
+        echo "ERROR: Failed to get coverage after $MAX_ATTEMPTS attempts"
         exit 1
       fi
 
-
-
-      COVERAGE=$(curl -s -u "$SONAR_TOKEN": "$SONAR_HOST_URL/api/measures/component?component=$PROJECT_KEY&metricKeys=coverage" | jq -r '.component.measures[0].value')
-      if [ "$COVERAGE" = "null" ]; then
-        echo "Coverage data unavailable"
-        exit 1
-      elif [ $(echo "$COVERAGE < 80" | bc) -eq 1 ]; then
+      if [ $(echo "$COVERAGE < 80" | bc) -eq 1 ]; then
         echo "Code coverage $COVERAGE% < 80%"
         exit 1
       fi
