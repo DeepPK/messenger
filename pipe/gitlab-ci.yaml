@@ -40,6 +40,7 @@ test:
   artifacts:
     paths:
       - target/site/jacoco/jacoco.xml
+      - target/surefire-reports/*.xml
     reports:
       junit: target/surefire-reports/*.xml
 
@@ -81,21 +82,15 @@ check-metrics:
     - sleep 30
     - |
       ATTEMPT=0
-      MAX_ATTEMPTS=${MAX_ATTEMPTS:-10}
+      MAX_ATTEMPTS=15  # Увеличено до 15 попыток
       PROJECT_KEY="$SONAR_PROJECT_KEY"
+      COVERAGE="null"
 
-      while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
-        STATUS=$(curl -s -u "$SONAR_TOKEN": "$SONAR_HOST_URL/api/qualitygates/project_status?projectKey=$PROJECT_KEY" | jq -r '.projectStatus.status')
-      
-        if [ "$STATUS" = "OK" ]; then
-          echo "Quality Gate passed"
-          break
-        elif [ "$STATUS" = "ERROR" ]; then
-          echo "Quality Gate failed"
-          exit 1
-        fi
-
-        sleep 30
+      # Ожидаем данные о покрытии
+      while [ "$COVERAGE" = "null" ] && [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+        COVERAGE=$(curl -s -u "$SONAR_TOKEN": "$SONAR_HOST_URL/api/measures/component?component=$PROJECT_KEY&metricKeys=coverage" | jq -r '.component.measures[0].value')
+        echo "Попытка $ATTEMPT: Coverage = $COVERAGE"
+        sleep 20
         ATTEMPT=$((ATTEMPT+1))
       done
 
