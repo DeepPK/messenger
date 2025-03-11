@@ -85,12 +85,19 @@ check-metrics:
       PROJECT_KEY="$SONAR_PROJECT_KEY"
       COVERAGE="null"
 
-      # Ожидаем, пока SonarQube обработает данные
-      while [ "$COVERAGE" = "null" ] && [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
-        RESPONSE=$(curl -s -u "$SONAR_TOKEN": "$SONAR_HOST_URL/api/measures/component?component=$PROJECT_KEY&metricKeys=coverage")
-        echo "API Response: $RESPONSE"
-        COVERAGE=$(echo "$RESPONSE" | jq -r '.component.measures[0].value')
-        sleep 15
+      while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+        STATUS=$(curl -s -u "$SONAR_TOKEN": "$SONAR_HOST_URL/api/qualitygates/project_status?projectKey=$PROJECT_KEY" | jq -r '.projectStatus.status')
+      
+        if [ "$STATUS" = "OK" ]; then
+          echo "Quality Gate passed"
+          break
+        elif [ "$STATUS" = "ERROR" ]; then
+          echo "Quality Gate failed"
+          exit 1
+        fi
+
+        sleep 30
+
         ATTEMPT=$((ATTEMPT+1))
         echo "Attempt $ATTEMPT: Coverage = $COVERAGE"
       done
