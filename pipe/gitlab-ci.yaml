@@ -82,16 +82,18 @@ check-metrics:
     - sleep 30
     - |
       ATTEMPT=0
-      MAX_ATTEMPTS=15  # Увеличено до 15 попыток
+      MAX_ATTEMPTS=20  # Увеличено количество попыток
       PROJECT_KEY="$SONAR_PROJECT_KEY"
       COVERAGE="null"
 
-      # Ожидаем данные о покрытии
+      # Ожидаем, пока SonarQube обработает данные
       while [ "$COVERAGE" = "null" ] && [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
-        COVERAGE=$(curl -s -u "$SONAR_TOKEN": "$SONAR_HOST_URL/api/measures/component?component=$PROJECT_KEY&metricKeys=coverage" | jq -r '.component.measures[0].value')
-        echo "Попытка $ATTEMPT: Coverage = $COVERAGE"
-        sleep 20
+        RESPONSE=$(curl -s -u "$SONAR_TOKEN": "$SONAR_HOST_URL/api/measures/component?component=$PROJECT_KEY&metricKeys=coverage")
+        echo "API Response: $RESPONSE"
+        COVERAGE=$(echo "$RESPONSE" | jq -r '.component.measures[0].value')
+        sleep 15
         ATTEMPT=$((ATTEMPT+1))
+        echo "Attempt $ATTEMPT: Coverage = $COVERAGE"
       done
 
       if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
