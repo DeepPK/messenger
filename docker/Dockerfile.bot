@@ -2,13 +2,13 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY requirements.txt .
+COPY /docker/requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY /docker .
 
 ENV TOKEN="7537054107:AAHwkBopAiYR0fleIogFq57wC2_Se5CxX5s"
-ENV BACKEND_URL="http://backend:8080"
+ENV BACKEND_URL="http://backend:8080/messages"
 
 CMD ["python", "Telegram_Bot.py"]

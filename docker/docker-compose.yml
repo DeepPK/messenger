@@ -21,7 +21,7 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.front
     ports:
-      - "3000:3000"
+      - "3000:80"
     volumes:
       - .:/app
       - /app/node_modules
