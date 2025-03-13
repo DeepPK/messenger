@@ -28,6 +28,9 @@ public class MessageService {
     }
 
     public void deleteMessage(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("Invalid ID");
+        }
         messageRepo.deleteById(id);
     }
 
@@ -35,4 +38,13 @@ public class MessageService {
         return messageRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Message not found with ID: " + id));
     }
+
+    public List<Message> searchMessages(String keyword) {
+        return messageRepo.findByContentContainingIgnoreCase(keyword);
+    }
+
+    public List<Message> getAllMessages() {
+        return messageRepo.findAll();
+    }
+
 }

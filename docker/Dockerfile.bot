@@ -11,4 +11,4 @@ COPY /docker .
 ENV TOKEN="7537054107:AAHwkBopAiYR0fleIogFq57wC2_Se5CxX5s"
 ENV BACKEND_URL="http://backend:8080"
 
-CMD ["python", "main.py"]
+CMD ["python", "Telegram_Bot.py"]
