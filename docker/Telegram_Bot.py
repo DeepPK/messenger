@@ -4,7 +4,7 @@ from telegram.ext import Application, CommandHandler, ContextTypes
 import requests
 
 TOKEN = "7537054107:AAHwkBopAiYR0fleIogFq57wC2_Se5CxX5s"
-BACKEND_URL = "http://backend:8080"
+BACKEND_URL = "http://localhost:8080"
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
