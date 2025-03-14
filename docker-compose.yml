@@ -4,8 +4,8 @@ services:
   messenger_back:
     container_name: backend
     build:
-      context: ..
-      dockerfile: docker/Dockerfile.back
+      context: .
+      dockerfile: Dockerfile.back
     networks:
       - messenger-network
     ports:
@@ -18,8 +18,8 @@ services:
   app:
     container_name: frontend
     build:
-      context: ..
-      dockerfile: docker/Dockerfile.front
+      context: .
+      dockerfile: Dockerfile.front
     ports:
       - "3000:80"
     volumes:
@@ -34,8 +34,8 @@ services:
   bot:
     container_name: bot
     build:
-      context: ..
-      dockerfile: docker/Dockerfile.bot
+      context: .
+      dockerfile: Dockerfile.bot
     networks:
       - messenger-network
     environment:
