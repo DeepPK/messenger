@@ -4,7 +4,7 @@ services:
   messenger_back:
     container_name: backend
     build:
-      context: messenger-frontend
+      context: .
       dockerfile: Dockerfile.back
     networks:
       - messenger-network
@@ -22,14 +22,9 @@ services:
       dockerfile: Dockerfile.front
     ports:
       - "3000:80"
-    volumes:
-      - .:/app
-      - ./node_modules:/app/node_modules
     environment:
-      - NODE_ENV=development
-    stdin_open: true
-    tty: true
-    command: npm start
+      - NODE_ENV=production
+    restart: unless-stopped
     networks:
       - messenger-network
 
