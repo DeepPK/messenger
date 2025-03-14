@@ -4,7 +4,7 @@ services:
   messenger_back:
     container_name: backend
     build:
-      context: .
+      context: messenger-frontend
       dockerfile: Dockerfile.back
     networks:
       - messenger-network
@@ -18,15 +18,18 @@ services:
   app:
     container_name: frontend
     build:
-      context: .
+      context: messenger-frontend
       dockerfile: Dockerfile.front
     ports:
       - "3000:80"
     volumes:
       - .:/app
-      - /app/node_modules
+      - ./node_modules:/app/node_modules
     environment:
       - NODE_ENV=development
+    stdin_open: true
+    tty: true
+    command: npm start
     networks:
       - messenger-network
 
@@ -34,7 +37,7 @@ services:
   bot:
     container_name: bot
     build:
-      context: .
+      context: Telegram_bot
       dockerfile: Dockerfile.bot
     networks:
       - messenger-network
