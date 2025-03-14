@@ -17,7 +17,7 @@ function App() {
 
     const fetchMessages = async () => {
         try {
-            const response = await axios.get('http://backend:8080/messages/all');
+            const response = await axios.get(`/api/messages/all`);
             setMessages(response.data);
         } catch (error) {
             console.error('Error fetching messages:', error);
@@ -31,7 +31,7 @@ function App() {
             formData.append('recipient', message.recipient);
             formData.append('content', message.content);
 
-            await axios.post('http://backend:8080/messages/send', formData, {
+            await axios.post(`/api/messages/send`, formData, {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
@@ -48,7 +48,7 @@ function App() {
             return;
         }
         try {
-            await axios.delete(`http://backend:8080/messages/${id}`);
+            await axios.delete(`/api/messages/${id}`);
             fetchMessages();
         } catch (error) {
             console.error('Delete error:', error.response?.data);
@@ -62,7 +62,7 @@ function App() {
         }
 
         try {
-            const response = await axios.get(`http://backend:8080/messages/search?keyword=${keyword}`);
+            const response = await axios.get(`/api/messages/search?keyword=${keyword}`);
             setSearchResults(response.data);
             setIsSearching(true);
         } catch (error) {

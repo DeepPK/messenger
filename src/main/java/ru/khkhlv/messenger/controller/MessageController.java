@@ -11,7 +11,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(
-        origins = "http://frontend:3000",
+        origins = "http://localhost:3000",
         methods = {RequestMethod.POST}
 )
 @RequestMapping("/messages")
@@ -32,7 +32,7 @@ public class MessageController {
 
     @GetMapping("/{recipient}")
     @CrossOrigin(
-            origins = "http://frontend:3000",
+            origins = "http://localhost:3000",
             methods = {RequestMethod.GET}
     )
     public List<Message> getMessages(@PathVariable("recipient") String recipient) {
@@ -41,7 +41,7 @@ public class MessageController {
 
     @GetMapping("/message/{id}")
     @CrossOrigin(
-            origins = "http://frontend:3000",
+            origins = "http://localhost:3000",
             allowedHeaders = "*",
             methods = {RequestMethod.GET}
     )
@@ -51,7 +51,7 @@ public class MessageController {
 
     @DeleteMapping("/{id}")
     @CrossOrigin(
-            origins = "http://frontend:3000",
+            origins = "http://localhost:3000",
             allowedHeaders = "*",
             methods = {RequestMethod.DELETE}
     )
@@ -63,7 +63,7 @@ public class MessageController {
 
     @GetMapping("/all")
     @CrossOrigin(
-            origins = "http://frontend:3000",
+            origins = "http://localhost:3000",
             allowedHeaders = "*",
             methods = {RequestMethod.GET}
     )
@@ -73,7 +73,7 @@ public class MessageController {
 
     @GetMapping("/search")
     @CrossOrigin(
-            origins = "http://frontend:3000",
+            origins = "http://localhost:3000",
             allowedHeaders = "*",
             methods = {RequestMethod.GET}
     )
