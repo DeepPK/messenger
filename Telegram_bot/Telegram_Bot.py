@@ -2,9 +2,10 @@ import logging
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 import requests
+import os
 
 TOKEN = "7537054107:AAHwkBopAiYR0fleIogFq57wC2_Se5CxX5s"
-BACKEND_URL = "http://backend:8080/messages"
+BACKEND_URL = os.getenv("BACKEND_URL", "http://default-url")
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -21,7 +22,7 @@ def format_message(message: dict) -> str:
         f"📨 Сообщение #{message.get('id', 'N/A')}\n"
         f"👤 От: {message.get('sender', 'Неизвестно')}\n"
         f"👥 Кому: {message.get('recipient', 'Неизвестно')}\n"
-        f"📅 Дата: {message.get('timestamp', 'N/A')}\n"
+        f"📅 Дата: {message.get('timestamp', 'Неизвестно')}\n"
         f"📝 Текст: {message.get('content', '')}\n"
         "────────────────────"
     )

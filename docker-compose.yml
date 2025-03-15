@@ -16,6 +16,7 @@ services:
       spring.datasource.password: "postgres"
       SERVER_ADDRESS: "0.0.0.0"
 
+
   app:
     container_name: frontend
     build:
@@ -25,6 +26,7 @@ services:
       - "3000:80"
     environment:
       - NODE_ENV=production
+      - REACT_APP_BACKEND_URL=http://backend:8080/messages
     restart: unless-stopped
     networks:
       - messenger-network
@@ -39,7 +41,7 @@ services:
       - messenger-network
     environment:
       - TOKEN=7537054107:AAHwkBopAiYR0fleIogFq57wC2_Se5CxX5s
-      - BACKEND_URL=http://backend:8080
+      - BACKEND_URL=http://backend:8080/messages
 
   messenger-db:
     container_name: messenger-db
