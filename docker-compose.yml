@@ -27,7 +27,6 @@ services:
     environment:
       - NODE_ENV=production
       - REACT_APP_BACKEND_URL=http://backend:8080/messages
-      - BACKEND_URL=http://backend:8080
     restart: unless-stopped
     networks:
       - messenger-network
