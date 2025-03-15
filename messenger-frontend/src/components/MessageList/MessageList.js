@@ -3,11 +3,16 @@ import { ListGroup, Badge, Button } from 'react-bootstrap';
 
 const MessageList = ({ messages, onDelete }) => {
     return (
-        <div>
+        <div data-testid="message-list">
             <h3>Messages</h3>
-            <ListGroup>
+            <ListGroup as="ul">
                 {messages.map(message => (
-                    <ListGroup.Item key={message.id} className="d-flex justify-content-between align-items-start">
+                    <ListGroup.Item
+                        key={message.id}
+                        as="li"
+                        role="listitem"
+                        className="d-flex justify-content-between align-items-start"
+                    >
                         <div className="ms-2 me-auto">
                             <div className="fw-bold">
                                 {message.sender} → {message.recipient}
@@ -21,6 +26,7 @@ const MessageList = ({ messages, onDelete }) => {
                             variant="danger"
                             size="sm"
                             onClick={() => onDelete(message.id)}
+                            aria-label={`Delete message from ${message.sender}`}
                         >
                             Delete
                         </Button>
