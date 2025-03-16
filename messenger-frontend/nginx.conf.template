@@ -1,6 +1,12 @@
 server {
     listen 80;
 
+    location /metrics {
+        stub_status on;
+        access_log off;
+        allow all;
+    }
+
     location / {
         root /usr/share/nginx/html;
         try_files $uri $uri/ /index.html;
