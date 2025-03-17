@@ -31,19 +31,19 @@ cache:
     - ci-reports/
 
 # ------------------------- BACKEND -------------------------
-backend-build:
-  image: maven:3.8.6-openjdk-18
-  #stage: build
-  tags:
-    - messenger
-  script:
-    - cd "${BACKEND_DIR}"
-    - mvn ${MAVEN_CLI_OPTS} clean package -DskipTests
-  artifacts:
-    paths:
-      - target/classes/
-      - target/*.jar
-    expire_in: 1 day
+# backend-build:
+#   image: maven:3.8.6-openjdk-18
+#   #stage: build
+#   tags:
+#     - messenger
+#   script:
+#     - cd "${BACKEND_DIR}"
+#     - mvn ${MAVEN_CLI_OPTS} clean package -DskipTests
+#   artifacts:
+#     paths:
+#       - target/classes/
+#       - target/*.jar
+#     expire_in: 1 day
 
 backend-test:
   image: maven:3.8.6-openjdk-18
@@ -63,19 +63,19 @@ backend-test:
         - "**/target/surefire-reports/TEST-*.xml"
 
 # ------------------------- FRONTEND -----------------------
-frontend-build:
-  image: node:${NODE_VERSION}-alpine
-  #stage: build
-  tags:
-    - messenger
-  script:
-    - cd "${FRONTEND_DIR}"
-    - npm ci ${NPM_CI_OPTS}
-    - npm run build
-  artifacts:
-    paths:
-      - messenger-frontend/build/
-    expire_in: 1 day
+# frontend-build:
+#   image: node:${NODE_VERSION}-alpine
+#   #stage: build
+#   tags:
+#     - messenger
+#   script:
+#     - cd "${FRONTEND_DIR}"
+#     - npm ci ${NPM_CI_OPTS}
+#     - npm run build
+#   artifacts:
+#     paths:
+#       - messenger-frontend/build/
+#     expire_in: 1 day
 
 frontend-test:
   image: node:${NODE_VERSION}-alpine
