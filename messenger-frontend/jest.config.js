@@ -1,14 +1,13 @@
-const path = require('path');
-
 module.exports = {
   reporters: [
     'default',
     [
       'jest-junit',
       {
-        outputDirectory: path.join(process.cwd(), 'test-report'),
+        outputDirectory: './test-report',
         outputName: 'junit-test-results.xml',
-        suiteName: 'Jest Tests'
+        suiteName: 'Jest Tests',
+        addFileAttribute: 'true'
       }
     ]
   ],
@@ -18,5 +17,6 @@ module.exports = {
   testEnvironment: 'jsdom',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1'
-  }
+  },
+  setupFilesAfterEnv: ['<rootDir>/src/setupTests.js']
 };

@@ -80,15 +80,14 @@ frontend-test:
     - messenger
   variables:
     CI: "true"
+    BACKEND_URL: "http://backend:8080"
   script:
     - cd "${FRONTEND_DIR}"
     - npm ci ${NPM_CI_OPTS}
     - mkdir -p test-report
-    - echo "Current directory: $(pwd)"
     - npm test
     - ls -la test-report/
-    - ls -la "${FRONTEND_DIR}/test-report/"
-    - cp "${FRONTEND_DIR}/test-report/junit-test-results.xml" "${REPORTS_DIR}/frontend-junit.xml" || echo "Report copy failed"
+    - cp test-report/junit-test-results.xml "${REPORTS_DIR}/frontend-junit.xml" || echo "JUnit report not found"
   artifacts:
     reports:
       junit:
@@ -97,6 +96,7 @@ frontend-test:
     paths:
       - "${FRONTEND_DIR}/coverage/"
       - "${REPORTS_DIR}/"
+    when: always
 
 # ------------------------- SONARQUBE ANALYSIS -------------------------
 sonar-check:
