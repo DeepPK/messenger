@@ -71,10 +71,10 @@ frontend-test:
   script:
     - cd messenger-frontend
     - npm ci --no-audit --prefer-offline
-    - npm test -- --watchAll=false --coverage --reporters=jest-junit
+    - npm test -- --watchAll=false --coverage --reporters=default --reporters=jest-junit
   artifacts:
     reports:
-      junit: messenger-frontend/junit.xml
+      junit: frontend/junit-test-results.xml
     paths:
       - messenger-frontend/coverage/
 
