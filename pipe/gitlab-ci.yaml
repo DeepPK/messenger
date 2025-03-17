@@ -33,7 +33,7 @@ cache:
 # ------------------------- BACKEND -------------------------
 backend-build:
   image: maven:3.8.6-openjdk-18
-  stage: build
+  #stage: build
   tags:
     - messenger
   script:
@@ -65,7 +65,7 @@ backend-test:
 # ------------------------- FRONTEND -----------------------
 frontend-build:
   image: node:${NODE_VERSION}-alpine
-  stage: build
+  #stage: build
   tags:
     - messenger
   script:
