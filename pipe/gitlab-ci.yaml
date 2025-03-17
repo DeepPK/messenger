@@ -73,7 +73,6 @@ frontend-test:
   variables:
     CI: "true"
   script:
-    - echo "Current directory: $(pwd)"
     - cd "${FRONTEND_DIR}"
     - npm ci --no-audit --prefer-offline
     - mkdir -p test-report
