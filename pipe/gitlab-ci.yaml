@@ -60,7 +60,7 @@ backend-test:
     reports:
       junit: target/surefire-reports/TEST-*.xml
 
-# ------------------------- FRONTEND -------------------------
+# ------------------------- FRONTEND ------------------------
 frontend-build:
   image: node:${NODE_VERSION}-alpine
   stage: build
