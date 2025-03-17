@@ -87,7 +87,7 @@ frontend-test:
       --testResultsProcessor=jest-junit
     
     # Debug generated files
-    - echo "Current directory: $(pwd)"
+    #- echo "Current directory: $(pwd)"
     - find . -name "junit-test-results.xml"
     - ls -lR test-report
     
