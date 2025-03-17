@@ -44,7 +44,7 @@ frontend-build:
     - npm run build
   artifacts:
     paths:
-      - frontend/build/
+      - messenger-frontend/build/
     expire_in: 1 day
 
 backend-test:
@@ -69,14 +69,14 @@ frontend-test:
   variables:
     CI: "true"
   script:
-    - cd frontend
+    - cd messenger-frontend
     - npm ci --no-audit --prefer-offline
     - npm test -- --watchAll=false --coverage --reporters=jest-junit
   artifacts:
     reports:
-      junit: frontend/junit.xml
+      junit: messenger-frontend/junit.xml
     paths:
-      - frontend/coverage/
+      - messenger-frontend/coverage/
 
 sonar-check:
   image: maven:3-eclipse-temurin-17
