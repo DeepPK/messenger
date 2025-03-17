@@ -3,11 +3,13 @@ module.exports = {
     'default',
     [
       'jest-junit',
-      {
-        outputDirectory: 'test-report',
-        outputName: 'junit-test-results.xml',
-        suiteName: 'Jest Tests'
-      }
+      'jest-junit',
+        {
+          outputDirectory: 'test-report',
+          outputName: 'junit-test-results.xml',
+          suiteName: 'Jest Tests',
+          usePathForSuiteName: true
+        }
     ]
   ],
   collectCoverage: true,
