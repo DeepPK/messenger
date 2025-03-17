@@ -3,9 +3,12 @@ import { render, screen, waitFor } from '@testing-library/react';
 import App from './App';
 
 jest.mock('axios', () => ({
-  get: jest.fn(() => Promise.resolve({ data: [] })),
-  post: jest.fn(() => Promise.resolve()),
-  delete: jest.fn(() => Promise.resolve())
+  __esModule: true,
+  default: {
+    get: jest.fn(() => Promise.resolve({ data: [] })),
+    post: jest.fn(),
+    delete: jest.fn()
+  }
 }));
 
 describe('App', () => {

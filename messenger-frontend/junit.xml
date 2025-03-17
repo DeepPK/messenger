@@ -1,23 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="6" failures="0" errors="0" time="4.102">
-  <testsuite name="MessageSearch" errors="0" failures="0" skipped="0" timestamp="2025-03-17T15:58:46" time="1.838" tests="1">
-    <testcase classname="MessageSearch triggers search with input value" name="MessageSearch triggers search with input value" time="0.074">
+<testsuites name="jest tests" tests="5" failures="0" errors="0" time="4.083">
+  <testsuite name="MessageSearch" errors="0" failures="0" skipped="0" timestamp="2025-03-17T17:04:09" time="1.759" tests="1">
+    <testcase classname="MessageSearch triggers search on input" name="MessageSearch triggers search on input" time="0.111">
     </testcase>
   </testsuite>
-  <testsuite name="App" errors="0" failures="0" skipped="0" timestamp="2025-03-17T15:58:46" time="1.853" tests="1">
-    <testcase classname="App renders without crashing" name="App renders without crashing" time="0.081">
+  <testsuite name="MessageList" errors="0" failures="0" skipped="0" timestamp="2025-03-17T17:04:09" time="1.788" tests="2">
+    <testcase classname="MessageList renders messages correctly" name="MessageList renders messages correctly" time="0.116">
+    </testcase>
+    <testcase classname="MessageList shows empty state" name="MessageList shows empty state" time="0.006">
     </testcase>
   </testsuite>
-  <testsuite name="MessageForm" errors="0" failures="0" skipped="0" timestamp="2025-03-17T15:58:46" time="1.896" tests="2">
-    <testcase classname="MessageForm submits form with valid data" name="MessageForm submits form with valid data" time="0.114">
+  <testsuite name="MessageForm" errors="0" failures="0" skipped="0" timestamp="2025-03-17T17:04:09" time="1.86" tests="2">
+    <testcase classname="MessageForm submits valid form data" name="MessageForm submits valid form data" time="0.169">
     </testcase>
-    <testcase classname="MessageForm shows error when fields are empty" name="MessageForm shows error when fields are empty" time="0.019">
-    </testcase>
-  </testsuite>
-  <testsuite name="MessageList" errors="0" failures="0" skipped="0" timestamp="2025-03-17T15:58:46" time="1.923" tests="2">
-    <testcase classname="MessageList renders list of messages" name="MessageList renders list of messages" time="0.158">
-    </testcase>
-    <testcase classname="MessageList renders empty state when no messages" name="MessageList renders empty state when no messages" time="0.003">
+    <testcase classname="MessageForm shows error when fields are empty" name="MessageForm shows error when fields are empty" time="0.032">
     </testcase>
   </testsuite>
 </testsuites>

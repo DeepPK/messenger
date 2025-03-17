@@ -57,7 +57,7 @@ backend-test:
     - mvn test jacoco:report
   artifacts:
     paths:
-      - target/site/jacoco/jacoco.xml
+      - target/site/jacoco-aggregate/jacoco.xml
     reports:
       junit: target/surefire-reports/*.xml
 

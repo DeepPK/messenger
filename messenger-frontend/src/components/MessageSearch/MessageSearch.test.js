@@ -3,15 +3,15 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import MessageSearch from './MessageSearch';
 
 describe('MessageSearch', () => {
-  test('triggers search with input value', () => {
-    const mockOnSearch = jest.fn();
-    render(<MessageSearch onSearch={mockOnSearch} />);
+  test('triggers search on input', () => {
+    const mockSearch = jest.fn();
+    render(<MessageSearch onSearch={mockSearch} />);
 
-    fireEvent.change(screen.getByPlaceholderText(/search messages/i), {
+    fireEvent.change(screen.getByPlaceholderText('Search messages...'), {
       target: { value: 'test' }
     });
     fireEvent.click(screen.getByRole('button', { name: /search/i }));
 
-    expect(mockOnSearch).toHaveBeenCalledWith('test');
+    expect(mockSearch).toHaveBeenCalledWith('test');
   });
 });

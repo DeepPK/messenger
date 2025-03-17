@@ -1,21 +1,13 @@
 module.exports = {
-  reporters: [
-    'default',
-    [
-      'jest-junit',
-      {
-        outputDirectory: 'test-report',
-        outputName: 'junit-test-results.xml',
-        suiteName: 'Jest Tests',
-      }
-    ]
-  ],
-  collectCoverage: true,
-  coverageReporters: ['lcov', 'text'],
-  coverageDirectory: './coverage',
   testEnvironment: 'jsdom',
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1'
+    '\\.(css|less|scss|sass)$': 'identity-obj-proxy'
   },
+  transform: {
+    '^.+\\.(js|jsx|mjs)$': 'babel-jest'
+  },
+  transformIgnorePatterns: [
+    'node_modules/(?!(axios)/)'
+  ],
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.js']
 };
