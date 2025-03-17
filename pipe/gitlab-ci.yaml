@@ -120,6 +120,3 @@ sonar-check:
       -Dsonar.testExecutionReportPaths=ci-reports/frontend-junit.xml,**/target/surefire-reports/TEST-*.xml
       -Dsonar.qualitygate.wait=true
       -Dsonar.qualitygate.timeout=600
-  rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-    - if: $CI_COMMIT_BRANCH == 'main'
