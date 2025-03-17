@@ -71,12 +71,15 @@ frontend-test:
   script:
     - cd messenger-frontend
     - npm ci --no-audit --prefer-offline
-    - npm test -- --watchAll=false --coverage --reporters=default --reporters=jest-junit
+    - mkdir -p reports
+    - npm test
+    - cp coverage/lcov.info lcov.info
   artifacts:
     reports:
-      junit: frontend/junit-test-results.xml
+      junit: test-reports/junit-test-results.xml
     paths:
       - messenger-frontend/coverage/
+      - messenger-frontend/lcov.info
 
 sonar-check:
   image: sonarsource/sonar-scanner-cli:latest
@@ -111,9 +114,8 @@ sonar-check:
       -Dsonar.login=$SONAR_TOKEN
       -Dsonar.sources=src
       -Dsonar.tests=src
-      -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-      -Dsonar.testExecutionReportPaths=junit-test-results.xml
-      -Dsonar.language=js
+      -Dsonar.javascript.lcov.reportPaths=messenger-frontend/lcov.info
+      -Dsonar.testExecutionReportPaths=test-reports/junit-test-results.xml
   dependencies:
     - backend-test
     - frontend-test
