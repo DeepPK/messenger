@@ -17,8 +17,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --coverage --watchAll=false --reporters=jest-junit --testResultsProcessor=jest-junit",
-    "test:watch": "react-scripts test --watchAll",
+    "test": "react-scripts test --coverage --watchAll=false --reporters=jest-junit --testResultsProcessor=jest-junit --outputFile=./test-report/junit-test-results.xml",
+    "posttest": "mkdir -p ../ci-reports && cp test-report/junit-test-results.xml ../ci-reports/frontend-junit.xml",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
