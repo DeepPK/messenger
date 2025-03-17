@@ -92,7 +92,9 @@ frontend-test:
     - npm ci ${NPM_CI_OPTS}
     - npm install jest-junit --save-dev
     - mkdir -p "${REPORTS_DIR}"
-    - npm test -- --coverage --watchAll=false \
+    - npm test -- \
+      --coverage \
+      --watchAll=false \
       --reporters=jest-junit \
       --testResultsProcessor=jest-junit \
       --outputFile="${REPORTS_DIR}/frontend-junit.xml"
