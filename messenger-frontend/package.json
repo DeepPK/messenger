@@ -44,7 +44,9 @@
         "suiteName": "jest tests",
         "classNameTemplate": "{classname}",
         "titleTemplate": "{title}",
-        "ancestorSeparator": " › "
+        "ancestorSeparator": " › ",
+        "includeConsoleOutput": true,
+        "addFileAttribute": true
       }]
     ],
     "testEnvironment": "jsdom",
