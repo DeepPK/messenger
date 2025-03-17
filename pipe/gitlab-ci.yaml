@@ -85,20 +85,27 @@ frontend-test:
     BACKEND_URL: "http://backend:8080"
   script:
     - cd "${FRONTEND_DIR}"
-    - npm ci ${NPM_CI_OPTS}
-    - npm install jest-junit --save-dev
+    # Устанавливаем зависимости с явным указанием jest-junit
+    - npm ci ${NPM_CI_OPTS} --include=dev
     - mkdir -p "${REPORTS_DIR}"
-    - npm test -- --coverage --watchAll=false --reporters=default --reporters=jest-junit \
+    # Запуск тестов с корректными параметрами
+    - npm test -- \
+      --coverage \
+      --watchAll=false \
+      --reporters=default \
+      --reporters=jest-junit \
       --testResultsProcessor=jest-junit \
-      --outputFile=${REPORTS_DIR}/frontend-junit.xml
+      --outputFile="${REPORTS_DIR}/frontend-junit.xml"
+    # Копирование отчетов
     - cp coverage/lcov.info "${REPORTS_DIR}/frontend-lcov.info"
   artifacts:
     reports:
-      junit: "ci-reports/frontend-junit.xml"
+      junit:
+        - "ci-reports/frontend-junit.xml"
     paths:
       - "ci-reports/frontend-lcov.info"
-      - "messenger-frontend/node_modules/"
       - "ci-reports/"
+      - "messenger-frontend/node_modules/"
     expire_in: 1 day
     when: always
 
@@ -110,6 +117,9 @@ sonar-check:
   image: sonarsource/sonar-scanner-cli:latest
   variables:
     SONAR_SCANNER_OPTS: "-Xmx512m"
+  dependencies:
+    - backend-test
+    - frontend-test
   script:
     - sonar-scanner
       -Dsonar.projectKey=$SONAR_PROJECT_KEY
@@ -124,55 +134,49 @@ sonar-check:
       -Dsonar.testExecutionReportPaths=target/surefire-reports/TEST-*.xml,ci-reports/frontend-junit.xml
       -Dsonar.sourceEncoding=UTF-8
       -Dsonar.java.source=17
-  dependencies:
-    - backend-test
-    - frontend-test
+      -Dsonar.qualitygate.wait=true  # Ожидание Quality Gate
+      -Dsonar.qualitygate.timeout=600  # Таймаут 10 минут
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
     - if: $CI_COMMIT_BRANCH == 'master'
     - if: $CI_COMMIT_BRANCH == 'main'
     - if: $CI_COMMIT_BRANCH == 'develop'
 
-# ------------------------- QUALITY GATE CHECK -------------------------
-check-metrics:
-  image: alpine:latest
+# ------------------------- FALLBACK QUALITY CHECK -------------------------
+check-quality-gate:
   stage: quality-check
+  image: curlimages/curl:latest
   tags:
     - messenger
   script:
-    - apk update && apk add curl jq
     - |
-      ATTEMPT=0
-      MAX_ATTEMPTS=15
+      # Проверка статуса Quality Gate через API
       PROJECT_KEY="${SONAR_PROJECT_KEY}"
+      ANALYSIS_ID=$(curl -s -u "${SONAR_TOKEN}:" "${SONAR_HOST_URL}/api/project_analyses/search?project=${PROJECT_KEY}" | jq -r '.analyses[0].key')
       
-      # Проверка покрытия кода
-      while [ ${ATTEMPT} -lt ${MAX_ATTEMPTS} ]; do
-        RESPONSE=$(curl -s -u "${SONAR_TOKEN}:" "${SONAR_HOST_URL}/api/measures/component?component=${PROJECT_KEY}&metricKeys=coverage")
-        COVERAGE=$(echo "${RESPONSE}" | jq -r '.component.measures[0].value')
-      
-        [ "${COVERAGE}" != "null" ] && break
-      
-        echo "Waiting for coverage data... (attempt $((ATTEMPT+1)))"
-        sleep 15
-        ATTEMPT=$((ATTEMPT+1))
-      done
-
-      # Проверка критических уязвимостей
-      CRITICAL_ISSUES=$(curl -s -u "${SONAR_TOKEN}:" "${SONAR_HOST_URL}/api/issues/search?componentKeys=${PROJECT_KEY}&severities=CRITICAL" | jq -r '.total')
-      
-      # Проверка условий
-      if [ "${COVERAGE}" = "null" ]; then
-        echo "ERROR: Failed to get coverage after ${MAX_ATTEMPTS} attempts"
+      if [ -z "$ANALYSIS_ID" ]; then
+        echo "Error: Could not get analysis ID"
         exit 1
       fi
 
-      if [ $(echo "${COVERAGE} < 80" | bc) -eq 1 ]; then
-        echo "Code coverage ${COVERAGE}% < 80%"
-        exit 1
-      fi
-
-      if [ "${CRITICAL_ISSUES}" -gt 0 ]; then
-        echo "Found ${CRITICAL_ISSUES} critical issues"
-        exit 1
-      fi
+      QUALITY_GATE_STATUS=$(curl -s -u "${SONAR_TOKEN}:" "${SONAR_HOST_URL}/api/qualitygates/project_status?analysisId=${ANALYSIS_ID}" | jq -r '.projectStatus.status')
+      
+      case "$QUALITY_GATE_STATUS" in
+        "OK")
+          echo "Quality Gate passed!"
+          ;;
+        "WARN")
+          echo "Quality Gate warning!"
+          exit 1  # Фейлим пайплайн при WARN
+          ;;
+        "ERROR")
+          echo "Quality Gate failed!"
+          exit 1
+          ;;
+        *)
+          echo "Unknown Quality Gate status: ${QUALITY_GATE_STATUS}"
+          exit 1
+          ;;
+      esac
+  dependencies:
+    - sonar-check
