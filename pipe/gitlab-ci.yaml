@@ -28,7 +28,7 @@ cache:
     - .m2/repository
     - target/classes/
     - messenger-frontend/node_modules/
-    - ci-reports/
+    - target/site/jacoco-aggregate/
 
 # ------------------------- BACKEND -------------------------
 # backend-build:
@@ -53,6 +53,8 @@ backend-test:
   script:
     - cd "${BACKEND_DIR}"
     - mvn ${MAVEN_CLI_OPTS} clean test jacoco:report
+    - mkdir -p "${REPORTS_DIR}"
+    - cp target/site/jacoco-aggregate/jacoco.xml "${REPORTS_DIR}/backend-jacoco.xml"
   artifacts:
     paths:
       - "${REPORTS_DIR}/backend-jacoco.xml"
@@ -101,7 +103,7 @@ sonar-check:
   stage: sonar-check
   tags:
     - messenger
-  image: sonarsource/sonar-scanner-cli:latest
+  image: sonarsource/sonar-scanner-cli:5.0.1
   variables:
     SONAR_SCANNER_OPTS: "-Xmx512m"
   script:
@@ -110,12 +112,9 @@ sonar-check:
       -Dsonar.host.url=$SONAR_HOST_URL
       -Dsonar.login=$SONAR_TOKEN
       -Dsonar.sources=src/main/java,messenger-frontend/src
-      -Dsonar.tests=src/test/java,messenger-frontend/src
       -Dsonar.java.binaries=target/classes
-      -Dsonar.test.inclusions=**/*Test.java,**/*.test.js
       -Dsonar.coverage.jacoco.xmlReportPaths=ci-reports/backend-jacoco.xml
       -Dsonar.javascript.lcov.reportPaths=ci-reports/frontend-lcov.info
-      -Dsonar.testExecutionReportPaths=ci-reports/frontend-junit.xml,**/target/surefire-reports/TEST-*.xml
       -Dsonar.qualitygate.wait=true
       -Dsonar.qualitygate.timeout=600
 
