@@ -18,6 +18,7 @@ variables:
   # SonarQube
   SONAR_PROJECT_KEY: "DeepPK_messenger_f896f465-8052-4d8a-bb95-1979ae24fdb5"
   SONAR_USER_HOME: "${PROJECT_ROOT}/.sonar"
+  SONAR_HOST_URL: "http://192.168.59.129:9000"
   GIT_DEPTH: "0"
 
 cache:
