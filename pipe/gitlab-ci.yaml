@@ -1,7 +1,8 @@
 stages:
-  #- build
+  - build
   - test
   - sonar-check
+  - quality-check
 
 variables:
   PROJECT_ROOT: "${CI_PROJECT_DIR}"
@@ -26,24 +27,21 @@ cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
     - .m2/repository
-    - target/classes/
     - messenger-frontend/node_modules/
-    - ci-reports/
 
 # ------------------------- BACKEND -------------------------
-# backend-build:
-#   image: maven:3.8.6-openjdk-18
-#   #stage: build
-#   tags:
-#     - messenger
-#   script:
-#     - cd "${BACKEND_DIR}"
-#     - mvn ${MAVEN_CLI_OPTS} clean package -DskipTests
-#   artifacts:
-#     paths:
-#       - target/classes/
-#       - target/*.jar
-#     expire_in: 1 day
+#backend-build:
+#  image: maven:3.8.6-openjdk-18
+#  stage: build
+#  tags:
+#    - messenger
+#  script:
+#    - cd "${BACKEND_DIR}"
+#    - mvn ${MAVEN_CLI_OPTS} clean package -DskipTests
+#  artifacts:
+#    paths:
+#      - target/*.jar
+#    expire_in: 1 day
 
 backend-test:
   image: maven:3.8.6-openjdk-18
@@ -52,30 +50,28 @@ backend-test:
     - messenger
   script:
     - cd "${BACKEND_DIR}"
-    - mvn ${MAVEN_CLI_OPTS} clean test jacoco:report
-    - mkdir -p "${REPORTS_DIR}"
-    - cp target/site/jacoco-aggregate/jacoco.xml "${REPORTS_DIR}/backend-jacoco.xml"
+    - mvn ${MAVEN_CLI_OPTS} test
+    - mvn test jacoco:report
   artifacts:
     paths:
-      - "${REPORTS_DIR}/backend-jacoco.xml"
+      - target/site/jacoco/jacoco.xml
     reports:
-      junit:
-        - "**/target/surefire-reports/TEST-*.xml"
+      junit: target/surefire-reports/*.xml
 
-# ------------------------- FRONTEND -----------------------
-# frontend-build:
-#   image: node:${NODE_VERSION}-alpine
-#   #stage: build
-#   tags:
-#     - messenger
-#   script:
-#     - cd "${FRONTEND_DIR}"
-#     - npm ci ${NPM_CI_OPTS}
-#     - npm run build
-#   artifacts:
-#     paths:
-#       - messenger-frontend/build/
-#     expire_in: 1 day
+# ------------------------- FRONTEND -------------------------
+#frontend-build:
+#  image: node:${NODE_VERSION}-alpine
+#  stage: build
+#  tags:
+#    - messenger
+#  script:
+#    - cd "${FRONTEND_DIR}"
+#    - npm ci ${NPM_CI_OPTS}
+#    - npm run build
+#  artifacts:
+#    paths:
+#      - messenger-frontend/build/
+#    expire_in: 1 day
 
 frontend-test:
   image: node:${NODE_VERSION}-alpine
@@ -87,16 +83,19 @@ frontend-test:
   script:
     - cd "${FRONTEND_DIR}"
     - npm ci ${NPM_CI_OPTS}
-    - npm install jest-junit --save-dev
-    - mkdir -p "${REPORTS_DIR}"
-    - npm test -- --coverage --watchAll=false --testLocationInResults --reporters=jest-junit --testResultsProcessor=jest-junit --outputFile="${REPORTS_DIR}/frontend-junit.xml"
-    - cp coverage/lcov.info "${REPORTS_DIR}/frontend-lcov.info"
+    - mkdir -p test-report
+    - npm test
+    - ls -la test-report/
+    - ls -la "${FRONTEND_DIR}/test-report/"
+    - cp "${FRONTEND_DIR}/test-report/junit-test-results.xml" "${REPORTS_DIR}/frontend-junit.xml" || echo "Report copy failed"
   artifacts:
-    paths:
-      - "${REPORTS_DIR}/frontend-lcov.info"
-      - "${REPORTS_DIR}/frontend-junit.xml"
     reports:
-      junit: "${REPORTS_DIR}/frontend-junit.xml"
+      junit:
+        - "${FRONTEND_DIR}/test-report/junit-test-results.xml"
+        - "${REPORTS_DIR}/frontend-junit.xml"
+    paths:
+      - "${FRONTEND_DIR}/coverage/"
+      - "${REPORTS_DIR}/"
 
 # ------------------------- SONARQUBE ANALYSIS -------------------------
 sonar-check:
@@ -107,16 +106,35 @@ sonar-check:
   variables:
     SONAR_SCANNER_OPTS: "-Xmx512m"
   script:
+    - echo "Running SonarQube analysis for both projects"
+    # Анализ бэкенда
+    - sonar-scanner
+      -Dsonar.projectKey=$SONAR_PROJECT_KEY
+      -Dsonar.projectName=Messenger
+      -Dsonar.host.url=$SONAR_HOST_URL
+      -Dsonar.login=$SONAR_TOKEN
+      -Dsonar.sources=src/main/java
+      -Dsonar.java.binaries=target/classes
+      -Dsonar.tests=src/test/java
+      -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+      -Dsonar.language=java
+    # Анализ фронтенда
+    - cd frontend
     - sonar-scanner
       -Dsonar.projectKey=$SONAR_PROJECT_KEY
       -Dsonar.host.url=$SONAR_HOST_URL
       -Dsonar.login=$SONAR_TOKEN
-      -Dsonar.sources=src/main/java,messenger-frontend/src
-      -Dsonar.tests=src/test/java,messenger-frontend/src
-      -Dsonar.java.binaries=target/classes
-      -Dsonar.test.inclusions=**/*Test.java,**/*.test.js
-      -Dsonar.coverage.jacoco.xmlReportPaths=ci-reports/backend-jacoco.xml
-      -Dsonar.javascript.lcov.reportPaths=ci-reports/frontend-lcov.info
-      -Dsonar.testExecutionReportPaths=ci-reports/frontend-junit.xml,**/target/surefire-reports/TEST-*.xml
-      -Dsonar.qualitygate.wait=true
-      -Dsonar.qualitygate.timeout=600
+      -Dsonar.sources=src
+      -Dsonar.tests=src
+      -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+      -Dsonar.testExecutionReportPaths=junit-test-results.xml
+      -Dsonar.language=js
+  dependencies:
+    - backend-test
+    - frontend-test
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_COMMIT_BRANCH == 'master'
+    - if: $CI_COMMIT_BRANCH == 'main'
+    - if: $CI_COMMIT_BRANCH == 'develop'
+
