@@ -53,6 +53,8 @@ backend-test:
   script:
     - cd "${BACKEND_DIR}"
     - mvn ${MAVEN_CLI_OPTS} clean test jacoco:report
+    - echo "=== Jacoco Report Contents ==="
+    - ls -la target/site/jacoco/
     - mkdir -p "${REPORTS_DIR}"
     - cp target/site/jacoco/jacoco.xml "${REPORTS_DIR}/backend-jacoco.xml"
   artifacts:
