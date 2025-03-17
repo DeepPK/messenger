@@ -54,16 +54,16 @@ backend-test:
     - cd "${BACKEND_DIR}"
     - mvn ${MAVEN_CLI_OPTS} clean test
     - mvn jacoco:report-aggregate
-    - echo "=== Jacoco Report Contents ==="
-    - ls -la target/site/jacoco-aggregate/
+    - mvn surefire-report:report
     - mkdir -p "${REPORTS_DIR}"
     - cp target/site/jacoco-aggregate/jacoco.xml "${REPORTS_DIR}/backend-jacoco.xml"
+    - cp target/surefire-reports/TEST-*.xml "${REPORTS_DIR}/"
   artifacts:
     paths:
-      - "${REPORTS_DIR}/backend-jacoco.xml"
+      - "${REPORTS_DIR}/*.xml"
     reports:
       junit:
-        - "**/target/surefire-reports/TEST-*.xml"
+        - "${REPORTS_DIR}/TEST-*.xml"
 
 # ------------------------- FRONTEND -----------------------
 # frontend-build:
@@ -111,8 +111,6 @@ sonar-check:
     SONAR_SCANNER_OPTS: "-Xmx512m"
   script:
     - echo "Проверка существования отчетов:"
-    - ls -la "${REPORTS_DIR}/frontend-junit.xml"
-    - ls -la "${BACKEND_DIR}/target/surefire-reports/TEST-*.xml"
     - sonar-scanner
       -Dsonar.projectKey=$SONAR_PROJECT_KEY
       -Dsonar.host.url=$SONAR_HOST_URL
