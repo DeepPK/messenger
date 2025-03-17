@@ -53,8 +53,7 @@ backend-test:
     - messenger
   script:
     - cd "${BACKEND_DIR}"
-    - mvn ${MAVEN_CLI_OPTS} test
-    - mvn test jacoco:report
+    - mvn ${MAVEN_CLI_OPTS} test jacoco:report
   artifacts:
     paths:
       - target/site/jacoco-aggregate/jacoco.xml
@@ -85,22 +84,19 @@ frontend-test:
     CI: "true"
     BACKEND_URL: "http://backend:8080"
   script:
+    - mkdir -p "${REPORTS_DIR}"
     - cd "${FRONTEND_DIR}"
-      - npm ci
-      - mkdir -p test-report
-      - chmod -R 777 test-report
-      - mkdir -p "${REPORTS_DIR}"
-      - npm test -- --coverage --watchAll=false --reporters=jest-junit --testResultsProcessor=jest-junit --outputFile=test-report/junit-test-results.xml
-      - cp test-report/junit-test-results.xml "${REPORTS_DIR}/frontend-junit.xml" || echo "JUnit report not found"
-      - cp coverage/lcov.info "${REPORTS_DIR}/frontend-lcov.info" || echo "LCov report not found"
+    - npm ci
+    - mkdir -p test-report
+    - npm test -- --coverage --watchAll=false --reporters=jest-junit --testResultsProcessor=jest-junit --outputFile=test-report/junit-test-results.xml
+    - cp test-report/junit-test-results.xml "${REPORTS_DIR}/frontend-junit.xml"
+    - cp coverage/lcov.info "${REPORTS_DIR}/frontend-lcov.info"
   artifacts:
     reports:
-      junit:
-        - "${FRONTEND_DIR}/test-report/junit-test-results.xml"
-        - "${REPORTS_DIR}/frontend-junit.xml"
-    paths:
-      - "${FRONTEND_DIR}/coverage/"
-      - "${REPORTS_DIR}/"
+      junit: "ci-reports/frontend-junit.xml"
+      paths:
+        - "ci-reports/frontend-lcov.info"
+        - "ci-reports/"
     when: always
 
 # ------------------------- SONARQUBE ANALYSIS -------------------------
@@ -121,9 +117,9 @@ sonar-check:
       -Dsonar.sources=src/main/java,$FRONTEND_DIR/src
       -Dsonar.java.binaries=target/classes/
       -Dsonar.tests=src/test/java,$FRONTEND_DIR/src
-      -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
-      -Dsonar.javascript.lcov.reportPaths=$REPORTS_DIR/frontend-lcov.info
-      -Dsonar.testExecutionReportPaths=target/surefire-reports/*.xml,$REPORTS_DIR/frontend-junit.xml
+      -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco-aggregate/jacoco.xml
+      -Dsonar.javascript.lcov.reportPaths=ci-reports/frontend-lcov.info
+      -Dsonar.testExecutionReportPaths=target/surefire-reports/TEST-*.xml,ci-reports/frontend-junit.xml
       -Dsonar.sourceEncoding=UTF-8
       -Dsonar.java.source=17
   dependencies:
