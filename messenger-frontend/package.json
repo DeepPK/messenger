@@ -17,8 +17,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --coverage --watchAll=false",
-    "posttest": "echo 'JUnit report generated at: $(pwd)/test-report/junit-test-results.xml'",
+    "test": "react-scripts test --config=jest.config.js --watchAll=false --coverage",
+    "posttest": "echo 'Report generated at: ${PWD}/test-report/junit-test-results.xml'",
     "test:watch": "react-scripts test --watchAll",
     "eject": "react-scripts eject"
   },
@@ -48,6 +48,6 @@
     "babel-jest": "^29.7.0",
     "identity-obj-proxy": "^3.0.0",
     "jest-junit": "^15.0.0",
-    "react-scripts": "5.0.1"
+    "react-scripts": "5.0.0"
   }
 }
