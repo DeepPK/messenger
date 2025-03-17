@@ -77,9 +77,9 @@ frontend-test:
     - npm ci --no-audit --prefer-offline
     - mkdir -p test-report
     - npm test -- --watchAll=false --coverage --reporters=jest-junit --reporters=default
-    - ls -la test-report/  # Debug file locations
-    - cp test-report/junit-test-results.xml "${JUNIT_REPORT}"
-    - cp coverage/lcov.info "${LCOV_REPORT}"
+    #- ls -la test-report/  # Debug file locations
+    #- cp test-report/junit-test-results.xml "${JUNIT_REPORT}"
+    #- cp coverage/lcov.info "${LCOV_REPORT}"
   artifacts:
     reports:
       junit: "${JUNIT_REPORT}"
