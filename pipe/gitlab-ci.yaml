@@ -27,7 +27,9 @@ cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
     - .m2/repository
+    - target/classes/
     - messenger-frontend/node_modules/
+    - ci-reports/
 
 # ------------------------- BACKEND -------------------------
 backend-build:
@@ -40,6 +42,7 @@ backend-build:
     - mvn ${MAVEN_CLI_OPTS} clean package -DskipTests
   artifacts:
     paths:
+      - target/classes/
       - target/*.jar
     expire_in: 1 day
 
@@ -107,29 +110,20 @@ sonar-check:
   variables:
     SONAR_SCANNER_OPTS: "-Xmx512m"
   script:
-    - echo "Running SonarQube analysis for both projects"
-    # Анализ бэкенда
+    - echo "Running SonarQube analysis"
     - sonar-scanner
       -Dsonar.projectKey=$SONAR_PROJECT_KEY
       -Dsonar.projectName=Messenger
       -Dsonar.host.url=$SONAR_HOST_URL
       -Dsonar.login=$SONAR_TOKEN
-      -Dsonar.sources=src/main/java
-      -Dsonar.java.binaries=target/*.jar
-      -Dsonar.tests=src/test/java
+      -Dsonar.sources=src/main/java,$FRONTEND_DIR/src
+      -Dsonar.java.binaries=target/classes/
+      -Dsonar.tests=src/test/java,$FRONTEND_DIR/src
       -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
-      -Dsonar.language=java
-    # Анализ фронтенда
-    - cd frontend
-    - sonar-scanner
-      -Dsonar.projectKey=$SONAR_PROJECT_KEY
-      -Dsonar.host.url=$SONAR_HOST_URL
-      -Dsonar.login=$SONAR_TOKEN
-      -Dsonar.sources=src
-      -Dsonar.tests=src
-      -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-      -Dsonar.testExecutionReportPaths=junit-test-results.xml
-      -Dsonar.language=js
+      -Dsonar.javascript.lcov.reportPaths=$REPORTS_DIR/frontend-lcov.info
+      -Dsonar.testExecutionReportPaths=target/surefire-reports/*.xml,$REPORTS_DIR/frontend-junit.xml
+      -Dsonar.sourceEncoding=UTF-8
+      -Dsonar.java.source=17
   dependencies:
     - backend-test
     - frontend-test

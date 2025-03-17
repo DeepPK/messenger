@@ -17,7 +17,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --coverage --watchAll=false --testResultsProcessor=jest-junit",
+    "test": "react-scripts test --coverage --watchAll=false --coverageReporters=lcov --testResultsProcessor=jest-junit",
     "posttest": "mkdir -p ../ci-reports && (cp ./test-report/junit-test-results.xml ../ci-reports/frontend-junit.xml || true)",
     "eject": "react-scripts eject"
   },
