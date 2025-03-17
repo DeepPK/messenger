@@ -11,13 +11,15 @@ variables:
   MAX_ATTEMPTS: "10"
   SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
   GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+  NODE_VERSION: "18"
 
 cache:
-  key: maven
+  key: ${CI_COMMIT_REF_SLUG}
   paths:
     - .m2/repository
+    - frontend/node_modules/
 
-build:
+backend-build:
   image: maven:3.8.6-openjdk-18
   stage: build
   tags:
@@ -29,7 +31,23 @@ build:
       - target/*.jar
     expire_in: 1 day
 
-test:
+frontend-build:
+  image: node:${NODE_VERSION}-alpine
+  stage: build
+  tags:
+    - messenger
+  variables:
+    CI: "true"
+  script:
+    - cd messenger-frontend
+    - npm ci --no-audit --prefer-offline
+    - npm run build
+  artifacts:
+    paths:
+      - messenger-frontend/build/
+    expire_in: 1 day
+
+backend-test:
   image: maven:3.8.6-openjdk-18
   stage: test
   tags:
@@ -42,6 +60,23 @@ test:
       - target/site/jacoco/jacoco.xml
     reports:
       junit: target/surefire-reports/*.xml
+
+frontend-test:
+  image: node:${NODE_VERSION}-alpine
+  stage: test
+  tags:
+    - messenger
+  variables:
+    CI: "true"
+  script:
+    - cd messenger-frontend
+    - npm ci --no-audit --prefer-offline
+    - npm test -- --watchAll=false --coverage --reporters=jest-junit
+  artifacts:
+    reports:
+      junit: messenger-frontend/junit.xml
+    paths:
+      - messenger-frontend/coverage/
 
 sonar-check:
   image: maven:3-eclipse-temurin-17
@@ -64,7 +99,7 @@ sonar-check:
       -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
       -Dsonar.qualitygate.wait=true
   dependencies:
-    - test
+    - backend-test
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
     - if: $CI_COMMIT_BRANCH == 'master'
