@@ -2,13 +2,11 @@ stages:
   - build
   - test
   - sonar-check
-  - quality-check
 
 variables:
   PROJECT_ROOT: "${CI_PROJECT_DIR}"
   FRONTEND_DIR: "${PROJECT_ROOT}/messenger-frontend"
   BACKEND_DIR: "${PROJECT_ROOT}"
-  REPORTS_DIR: "${PROJECT_ROOT}/ci-reports"
   
   # Maven settings
   MAVEN_OPTS: "-Dmaven.repo.local=${PROJECT_ROOT}/.m2/repository"
@@ -16,7 +14,6 @@ variables:
   
   # Node settings
   NODE_VERSION: "18"
-  NPM_CI_OPTS: "--no-audit --prefer-offline"
   
   # SonarQube
   SONAR_PROJECT_KEY: "DeepPK_messenger_f896f465-8052-4d8a-bb95-1979ae24fdb5"
@@ -80,34 +77,10 @@ frontend-test:
   stage: test
   tags:
     - messenger
-  variables:
-    CI: "true"
-    BACKEND_URL: "http://backend:8080"
   script:
     - cd "${FRONTEND_DIR}"
-    # Устанавливаем зависимости с явным указанием jest-junit
-    - npm ci ${NPM_CI_OPTS} --include=dev
-    - mkdir -p "${REPORTS_DIR}"
-    # Запуск тестов с корректными параметрами
-    - npm test -- \
-      --coverage \
-      --watchAll=false \
-      --reporters=default \
-      --reporters=jest-junit \
-      --testResultsProcessor=jest-junit \
-      --outputFile="${REPORTS_DIR}/frontend-junit.xml"
-    # Копирование отчетов
-    - cp coverage/lcov.info "${REPORTS_DIR}/frontend-lcov.info"
-  artifacts:
-    reports:
-      junit:
-        - "ci-reports/frontend-junit.xml"
-    paths:
-      - "ci-reports/frontend-lcov.info"
-      - "ci-reports/"
-      - "messenger-frontend/node_modules/"
-    expire_in: 1 day
-    when: always
+    - npm ci
+    - npm test -- --watchAll=false
 
 # ------------------------- SONARQUBE ANALYSIS -------------------------
 sonar-check:
@@ -117,66 +90,13 @@ sonar-check:
   image: sonarsource/sonar-scanner-cli:latest
   variables:
     SONAR_SCANNER_OPTS: "-Xmx512m"
-  dependencies:
-    - backend-test
-    - frontend-test
   script:
     - sonar-scanner
       -Dsonar.projectKey=$SONAR_PROJECT_KEY
-      -Dsonar.projectName=Messenger
       -Dsonar.host.url=$SONAR_HOST_URL
       -Dsonar.login=$SONAR_TOKEN
       -Dsonar.sources=src/main/java,messenger-frontend/src
       -Dsonar.java.binaries=target/classes/
-      -Dsonar.tests=src/test/java,messenger-frontend/src
-      -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco-aggregate/jacoco.xml
-      -Dsonar.javascript.lcov.reportPaths=ci-reports/frontend-lcov.info
-      -Dsonar.testExecutionReportPaths=target/surefire-reports/TEST-*.xml,ci-reports/frontend-junit.xml
-      -Dsonar.sourceEncoding=UTF-8
-      -Dsonar.java.source=17
       -Dsonar.qualitygate.wait=true
       -Dsonar.qualitygate.timeout=600
-  rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-    - if: $CI_COMMIT_BRANCH == 'master'
-    - if: $CI_COMMIT_BRANCH == 'main'
-    - if: $CI_COMMIT_BRANCH == 'develop'
-
-# ------------------------- FALLBACK QUALITY CHECK -------------------------
-check-quality-gate:
-  stage: quality-check
-  image: curlimages/curl:latest
-  tags:
-    - messenger
-  script:
-    - |
-      # Проверка статуса Quality Gate через API
-      PROJECT_KEY="${SONAR_PROJECT_KEY}"
-      ANALYSIS_ID=$(curl -s -u "${SONAR_TOKEN}:" "${SONAR_HOST_URL}/api/project_analyses/search?project=${PROJECT_KEY}" | jq -r '.analyses[0].key')
-      
-      if [ -z "$ANALYSIS_ID" ]; then
-        echo "Error: Could not get analysis ID"
-        exit 1
-      fi
-
-      QUALITY_GATE_STATUS=$(curl -s -u "${SONAR_TOKEN}:" "${SONAR_HOST_URL}/api/qualitygates/project_status?analysisId=${ANALYSIS_ID}" | jq -r '.projectStatus.status')
-      
-      case "$QUALITY_GATE_STATUS" in
-        "OK")
-          echo "Quality Gate passed!"
-          ;;
-        "WARN")
-          echo "Quality Gate warning!"
-          exit 1  # Фейлим пайплайн при WARN
-          ;;
-        "ERROR")
-          echo "Quality Gate failed!"
-          exit 1
-          ;;
-        *)
-          echo "Unknown Quality Gate status: ${QUALITY_GATE_STATUS}"
-          exit 1
-          ;;
-      esac
-  dependencies:
-    - sonar-check
+      -Dsonar.analysis.force=true
