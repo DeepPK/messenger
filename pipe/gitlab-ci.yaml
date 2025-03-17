@@ -94,9 +94,9 @@ frontend-test:
   artifacts:
     reports:
       junit: "ci-reports/frontend-junit.xml"
-      paths:
-        - "ci-reports/frontend-lcov.info"
-        - "ci-reports/"
+    paths:
+      - "ci-reports/frontend-lcov.info"
+      - "ci-reports/"
     when: always
 
 # ------------------------- SONARQUBE ANALYSIS -------------------------
