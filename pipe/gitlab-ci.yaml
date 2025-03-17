@@ -85,6 +85,7 @@ frontend-test:
     - npm ci ${NPM_CI_OPTS}
     - mkdir -p "${REPORTS_DIR}"
     - npm test -- --watchAll=false --coverage --reporters=jest-junit --reporters=default
+    # Исправленный путь к отчету
     - cp test-report/junit-test-results.xml "${REPORTS_DIR}/frontend-junit.xml"
     - cp coverage/lcov.info "${REPORTS_DIR}/frontend-lcov.info"
     # Debug commands
