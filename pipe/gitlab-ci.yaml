@@ -79,7 +79,7 @@ frontend-test:
       - messenger-frontend/coverage/
 
 sonar-check:
-  image: maven:3-eclipse-temurin-17
+  image: sonarsource/sonar-scanner-cli:latest
   stage: sonar-check
   tags:
     - messenger
@@ -89,17 +89,34 @@ sonar-check:
     paths:
       - "${SONAR_USER_HOME}/cache"
       - sonar-scanner/
+  variables:
+    SONAR_SCANNER_OPTS: "-Xmx512m"
   script:
-    - mvn sonar:sonar
-      -Dsonar.tests=src/test/java/ru/khkhlv
+    - echo "Running SonarQube analysis for both projects"
+    - sonar-scanner
       -Dsonar.projectName=Messenger
       -Dsonar.projectKey=$SONAR_PROJECT_KEY
       -Dsonar.host.url=$SONAR_HOST_URL
       -Dsonar.login=$SONAR_TOKEN
+      -Dsonar.sources=src/main/java
+      -Dsonar.java.binaries=target/classes
+      -Dsonar.tests=src/test/java/ru/khkhlv
       -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
       -Dsonar.qualitygate.wait=true
+      -Dsonar.language=java
+    - cd messenger-frontend
+    - sonar-scanner
+      -Dsonar.projectKey=$SONAR_PROJECT_KEY
+      -Dsonar.host.url=$SONAR_HOST_URL
+      -Dsonar.login=$SONAR_TOKEN
+      -Dsonar.sources=src
+      -Dsonar.tests=src
+      -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+      -Dsonar.testExecutionReportPaths=junit-test-results.xml
+      -Dsonar.language=js
   dependencies:
     - backend-test
+    - frontend-test
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
     - if: $CI_COMMIT_BRANCH == 'master'
