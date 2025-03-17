@@ -52,11 +52,12 @@ backend-test:
     - messenger
   script:
     - cd "${BACKEND_DIR}"
-    - mvn ${MAVEN_CLI_OPTS} clean test jacoco:report
+    - mvn ${MAVEN_CLI_OPTS} clean test
+    - mvn jacoco:report-aggregate
     - echo "=== Jacoco Report Contents ==="
     - ls -la target/site/jacoco/
     - mkdir -p "${REPORTS_DIR}"
-    - cp target/site/jacoco/jacoco.xml "${REPORTS_DIR}/backend-jacoco.xml"
+    - cp target/site/jacoco-aggregate/jacoco.xml "${REPORTS_DIR}/backend-jacoco.xml"
   artifacts:
     paths:
       - "${REPORTS_DIR}/backend-jacoco.xml"
