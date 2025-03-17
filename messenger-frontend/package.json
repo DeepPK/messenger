@@ -40,7 +40,11 @@
       "default",
       ["jest-junit", {
         "outputDirectory": "ci-reports",
-        "outputName": "frontend-junit.xml"
+        "outputName": "frontend-junit.xml",
+        "suiteName": "jest tests",
+        "classNameTemplate": "{classname}",
+        "titleTemplate": "{title}",
+        "ancestorSeparator": " › "
       }]
     ],
     "testEnvironment": "jsdom",

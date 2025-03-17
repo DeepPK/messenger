@@ -112,6 +112,9 @@ sonar-check:
   variables:
     SONAR_SCANNER_OPTS: "-Xmx512m"
   script:
+    - echo "Проверка существования отчетов:"
+    - ls -la "${REPORTS_DIR}/frontend-junit.xml"
+    - ls -la "${BACKEND_DIR}/target/surefire-reports/TEST-*.xml"
     - sonar-scanner
       -Dsonar.projectKey=$SONAR_PROJECT_KEY
       -Dsonar.host.url=$SONAR_HOST_URL
@@ -120,6 +123,7 @@ sonar-check:
       -Dsonar.java.binaries=target/classes
       -Dsonar.coverage.jacoco.xmlReportPaths=ci-reports/backend-jacoco.xml
       -Dsonar.javascript.lcov.reportPaths=ci-reports/frontend-lcov.info
+      -Dsonar.testExecutionReportPaths=ci-reports/frontend-junit.xml,**/target/surefire-reports/TEST-*.xml
       -Dsonar.qualitygate.wait=true
-      -Dsonar.qualitygate.timeout=600
+    needs: [ "backend-test", "frontend-test" ]
 
