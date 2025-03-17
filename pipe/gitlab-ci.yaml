@@ -59,19 +59,7 @@ backend-test:
       junit: target/surefire-reports/*.xml
 
 # ------------------------- FRONTEND -------------------------
-frontend-build:
-  image: node:${NODE_VERSION}-alpine
-  stage: build
-  tags:
-    - messenger
-  script:
-    - cd "${FRONTEND_DIR}"
-    - npm ci ${NPM_CI_OPTS}
-    - npm run build
-  artifacts:
-    paths:
-      - messenger-frontend/build/
-    expire_in: 1 day
+# pipe/.gitlab-ci.yml
 
 frontend-test:
   image: node:${NODE_VERSION}-alpine
@@ -82,14 +70,32 @@ frontend-test:
     CI: "true"
   script:
     - cd "${FRONTEND_DIR}"
+    
+    # Clean previous reports
+    - rm -rf test-report coverage
+    
+    # Install dependencies
     - npm ci ${NPM_CI_OPTS}
+    
+    # Run tests with explicit config
+    - npm test -- \
+      --watchAll=false \
+      --coverage \
+      --config=jest.config.js \
+      --reporters=jest-junit \
+      --reporters=default \
+      --testResultsProcessor=jest-junit
+    
+    # Debug generated files
+    - echo "Current directory: $(pwd)"
+    - find . -name "junit-test-results.xml"
+    - ls -lR test-report
+    
+    # Copy reports with absolute paths
     - mkdir -p "${REPORTS_DIR}"
-    - npm test -- --watchAll=false --coverage --reporters=jest-junit --reporters=default
-    - cp test-report/junit-test-results.xml "${REPORTS_DIR}/frontend-junit.xml"
-    - cp coverage/lcov.info "${REPORTS_DIR}/frontend-lcov.info"
-    # Debug commands
-    - ls -la "${REPORTS_DIR}"
-    - cat "${REPORTS_DIR}/frontend-junit.xml"
+    - cp "${FRONTEND_DIR}/test-report/junit-test-results.xml" "${REPORTS_DIR}/frontend-junit.xml"
+    - cp "${FRONTEND_DIR}/coverage/lcov.info" "${REPORTS_DIR}/frontend-lcov.info"
+  
   artifacts:
     reports:
       junit: "${REPORTS_DIR}/frontend-junit.xml"
