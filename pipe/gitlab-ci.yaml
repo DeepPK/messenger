@@ -39,7 +39,7 @@ frontend-build:
   variables:
     CI: "true"
   script:
-    - cd frontend
+    - cd messenger-frontend
     - npm ci --no-audit --prefer-offline
     - npm run build
   artifacts:
