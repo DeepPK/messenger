@@ -92,10 +92,16 @@ frontend-test:
     - npm ci ${NPM_CI_OPTS}
     - npm install jest-junit --save-dev
     - mkdir -p "${REPORTS_DIR}"
-    - npm test -- --coverage --watchAll=false --testLocationInResults --reporters=jest-junit --testResultsProcessor=jest-junit --outputFile="${REPORTS_DIR}/frontend-junit.xml"
-    - sed -i 's/<testsuites/<testExecutions version="1"/g' "${REPORTS_DIR}/frontend-junit.xml"
-    - sed -i 's/<\/testsuites>/<\/testExecutions>/g' "${REPORTS_DIR}/frontend-junit.xml"
-    - sed -i 's/<testsuite/<testsuite name="/g' "${REPORTS_DIR}/frontend-junit.xml"
+    - npm test -- --coverage --watchAll=false \
+      --reporters=jest-junit \
+      --testResultsProcessor=jest-junit \
+      --outputFile="${REPORTS_DIR}/frontend-junit.xml"
+    - sed -i 's/<testsuites /<testExecutions version="1"/' "${REPORTS_DIR}/frontend-junit.xml"
+    - sed -i 's/<\/testsuites>/<\/testExecutions>/' "${REPORTS_DIR}/frontend-junit.xml"
+    - sed -i 's/<testsuite /<file path="/g' "${REPORTS_DIR}/frontend-junit.xml"
+    - sed -i 's/<\/testsuite>/<\/file>/g' "${REPORTS_DIR}/frontend-junit.xml"
+    # Добавление обязательного атрибута file
+    - sed -i 's/<testcase /<testCase name="/g' "${REPORTS_DIR}/frontend-junit.xml"
     - cp coverage/lcov.info "${REPORTS_DIR}/frontend-lcov.info"
   artifacts:
     paths:
@@ -122,7 +128,8 @@ sonar-check:
       -Dsonar.java.binaries=target/classes
       -Dsonar.coverage.jacoco.xmlReportPaths=messenger-frontend/ci-reports/backend-jacoco.xml
       -Dsonar.javascript.lcov.reportPaths=messenger-frontend/ci-reports/frontend-lcov.info
-      -Dsonar.testExecutionReportPaths=messenger-frontend/ci-reports/frontend-junit.xml,**/target/surefire-reports/TEST-*.xml
+      -Dsonar.testExecutionReportPaths=**/target/surefire-reports/TEST-*.xml
+      -Dsonar.testExecutionReportPaths=messenger-frontend/ci-reports/frontend-junit.xml
       -Dsonar.qualitygate.wait=true
   needs: [ "backend-test", "frontend-test" ]
 
