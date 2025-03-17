@@ -55,7 +55,7 @@ backend-test:
     - mvn ${MAVEN_CLI_OPTS} clean test
     - mvn jacoco:report-aggregate
     - echo "=== Jacoco Report Contents ==="
-    - ls -la target/site/jacoco/
+    - ls -la target/site/jacoco-aggregate/
     - mkdir -p "${REPORTS_DIR}"
     - cp target/site/jacoco-aggregate/jacoco.xml "${REPORTS_DIR}/backend-jacoco.xml"
   artifacts:
