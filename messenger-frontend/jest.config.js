@@ -1,12 +1,11 @@
 javascript
 Copy
 module.exports = {
-  testEnvironment: 'jsdom',
-  transform: {
-    '^.+\\.(js|jsx)$': 'babel-jest'
-  },
-  moduleNameMapper: {
-    '\\.(css|less|scss|sass)$': 'identity-obj-proxy'
-  },
-  setupFilesAfterEnv: ['<rootDir>/src/setupTests.js']
+  reporters: [
+    'default',
+    ['jest-junit', { outputDirectory: 'reports', outputName: 'junit-test-results.xml' }]
+  ],
+  collectCoverage: true,
+  coverageReporters: ['lcov', 'text'],
+  coverageDirectory: 'coverage'
 };
