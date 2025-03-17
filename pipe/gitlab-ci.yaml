@@ -80,7 +80,7 @@ frontend-test:
       junit: frontend-junit-report.xml
     paths:
       - messenger-frontend/coverage/
-      - messenger-frontend-lcov.info
+      - frontend-lcov.info
 
 sonar-check:
   image: sonarsource/sonar-scanner-cli:latest
@@ -107,8 +107,8 @@ sonar-check:
       -Dsonar.tests=src/test/java/ru/khkhlv
       -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
       -Dsonar.qualitygate.wait=true
-      -Dsonar.javascript.lcov.reportPaths=frontend-lcov.info
       -Dsonar.testExecutionReportPaths=frontend-junit-report.xml
+      -Dsonar.javascript.lcov.reportPaths=frontend-lcov.info
     - cd messenger-frontend
     - sonar-scanner
       -Dsonar.projectKey=$SONAR_PROJECT_KEY
