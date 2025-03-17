@@ -119,7 +119,7 @@ sonar-check:
       -Dsonar.java.binaries=target/classes
       -Dsonar.coverage.jacoco.xmlReportPaths=ci-reports/backend-jacoco.xml
       -Dsonar.javascript.lcov.reportPaths=ci-reports/frontend-lcov.info
-      -Dsonar.testExecutionReportPaths=/messenger-frontend/ci-reports/frontend-junit.xml,**/target/surefire-reports/TEST-*.xml
+      -Dsonar.testExecutionReportPaths=messenger-frontend/ci-reports/frontend-junit.xml,**/target/surefire-reports/TEST-*.xml
       -Dsonar.qualitygate.wait=true
   needs: [ "backend-test", "frontend-test" ]
 
