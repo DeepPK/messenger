@@ -54,7 +54,7 @@ backend-test:
     - cd "${BACKEND_DIR}"
     - mvn ${MAVEN_CLI_OPTS} clean test jacoco:report
     - mkdir -p "${REPORTS_DIR}"
-    - cp target/site/jacoco-aggregate/jacoco.xml "${REPORTS_DIR}/backend-jacoco.xml"
+    - cp target/site/jacoco/jacoco.xml "${REPORTS_DIR}/backend-jacoco.xml"
   artifacts:
     paths:
       - "${REPORTS_DIR}/backend-jacoco.xml"
