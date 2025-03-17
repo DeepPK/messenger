@@ -7,6 +7,7 @@ variables:
   PROJECT_ROOT: "${CI_PROJECT_DIR}"
   FRONTEND_DIR: "${PROJECT_ROOT}/messenger-frontend"
   BACKEND_DIR: "${PROJECT_ROOT}"
+  REPORTS_DIR: "${PROJECT_ROOT}/ci-reports"
   
   # Maven settings
   MAVEN_OPTS: "-Dmaven.repo.local=${PROJECT_ROOT}/.m2/repository"
@@ -14,6 +15,7 @@ variables:
   
   # Node settings
   NODE_VERSION: "18"
+  NPM_CI_OPTS: "--no-audit --prefer-offline"
   
   # SonarQube
   SONAR_PROJECT_KEY: "DeepPK_messenger_f896f465-8052-4d8a-bb95-1979ae24fdb5"
@@ -50,12 +52,15 @@ backend-test:
     - messenger
   script:
     - cd "${BACKEND_DIR}"
-    - mvn ${MAVEN_CLI_OPTS} test jacoco:report-aggregate
+    - mvn ${MAVEN_CLI_OPTS} clean test jacoco:report
+    - mkdir -p "${REPORTS_DIR}"
+    - cp target/site/jacoco/jacoco.xml "${REPORTS_DIR}/backend-jacoco.xml"
   artifacts:
     paths:
-      - target/site/jacoco-aggregate/jacoco.xml
+      - "${REPORTS_DIR}/backend-jacoco.xml"
     reports:
-      junit: target/surefire-reports/TEST-*.xml
+      junit:
+        - "**/target/surefire-reports/TEST-*.xml"
 
 # ------------------------- FRONTEND ------------------------
 frontend-build:
@@ -77,10 +82,21 @@ frontend-test:
   stage: test
   tags:
     - messenger
+  variables:
+    CI: "true"
   script:
     - cd "${FRONTEND_DIR}"
-    - npm ci
-    - npm test -- --watchAll=false
+    - npm ci ${NPM_CI_OPTS}
+    - npm install jest-junit --save-dev
+    - mkdir -p "${REPORTS_DIR}"
+    - npm test -- --coverage --watchAll=false --testLocationInResults --reporters=jest-junit --testResultsProcessor=jest-junit --outputFile="${REPORTS_DIR}/frontend-junit.xml"
+    - cp coverage/lcov.info "${REPORTS_DIR}/frontend-lcov.info"
+  artifacts:
+    paths:
+      - "${REPORTS_DIR}/frontend-lcov.info"
+      - "${REPORTS_DIR}/frontend-junit.xml"
+    reports:
+      junit: "${REPORTS_DIR}/frontend-junit.xml"
 
 # ------------------------- SONARQUBE ANALYSIS -------------------------
 sonar-check:
@@ -96,7 +112,14 @@ sonar-check:
       -Dsonar.host.url=$SONAR_HOST_URL
       -Dsonar.login=$SONAR_TOKEN
       -Dsonar.sources=src/main/java,messenger-frontend/src
-      -Dsonar.java.binaries=target/classes/
+      -Dsonar.tests=src/test/java,messenger-frontend/src
+      -Dsonar.java.binaries=target/classes
+      -Dsonar.test.inclusions=**/*Test.java,**/*.test.js
+      -Dsonar.coverage.jacoco.xmlReportPaths=ci-reports/backend-jacoco.xml
+      -Dsonar.javascript.lcov.reportPaths=ci-reports/frontend-lcov.info
+      -Dsonar.testExecutionReportPaths=ci-reports/frontend-junit.xml,**/target/surefire-reports/TEST-*.xml
       -Dsonar.qualitygate.wait=true
       -Dsonar.qualitygate.timeout=600
-      -Dsonar.analysis.force=true
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_COMMIT_BRANCH == 'main'
