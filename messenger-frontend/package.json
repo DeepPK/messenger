@@ -18,7 +18,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --coverage --watchAll=false",
-    "posttest": "echo 'Post-test cleanup'",
+    "posttest": "echo 'JUnit report generated at: $(pwd)/test-report/junit-test-results.xml'",
     "test:watch": "react-scripts test --watchAll",
     "eject": "react-scripts eject"
   },
@@ -47,6 +47,7 @@
     "@testing-library/user-event": "^14.6.1",
     "babel-jest": "^29.7.0",
     "identity-obj-proxy": "^3.0.0",
-    "jest-junit": "^16.0.0"
+    "jest-junit": "^15.0.0",
+    "react-scripts": "5.0.1"
   }
 }
