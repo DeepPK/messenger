@@ -1,4 +1,3 @@
-module.exports = {
   reporters: [
     'default',
     ['jest-junit', {
@@ -9,5 +8,9 @@ module.exports = {
   ],
   collectCoverage: true,
   coverageReporters: ['lcov', 'text'],
-  coverageDirectory: 'coverage'
+  coverageDirectory: 'coverage',
+  testMatch: [
+    '**/__tests__/**/*.[jt]s?(x)',
+    '**/?(*.)+(spec|test).[jt]s?(x)'
+  ]
 };
