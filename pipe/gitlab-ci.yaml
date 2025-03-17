@@ -30,18 +30,18 @@ cache:
     - messenger-frontend/node_modules/
 
 # ------------------------- BACKEND -------------------------
-backend-build:
-  image: maven:3.8.6-openjdk-18
-  stage: build
-  tags:
-    - messenger
-  script:
-    - cd "${BACKEND_DIR}"
-    - mvn ${MAVEN_CLI_OPTS} clean package -DskipTests
-  artifacts:
-    paths:
-      - target/*.jar
-    expire_in: 1 day
+#backend-build:
+#  image: maven:3.8.6-openjdk-18
+#  stage: build
+#  tags:
+#    - messenger
+#  script:
+#    - cd "${BACKEND_DIR}"
+#    - mvn ${MAVEN_CLI_OPTS} clean package -DskipTests
+#  artifacts:
+#    paths:
+#      - target/*.jar
+#    expire_in: 1 day
 
 backend-test:
   image: maven:3.8.6-openjdk-18
@@ -59,19 +59,19 @@ backend-test:
       junit: target/surefire-reports/*.xml
 
 # ------------------------- FRONTEND -------------------------
-frontend-build:
-  image: node:${NODE_VERSION}-alpine
-  stage: build
-  tags:
-    - messenger
-  script:
-    - cd "${FRONTEND_DIR}"
-    - npm ci ${NPM_CI_OPTS}
-    - npm run build
-  artifacts:
-    paths:
-      - messenger-frontend/build/
-    expire_in: 1 day
+#frontend-build:
+#  image: node:${NODE_VERSION}-alpine
+#  stage: build
+#  tags:
+#    - messenger
+#  script:
+#    - cd "${FRONTEND_DIR}"
+#    - npm ci ${NPM_CI_OPTS}
+#    - npm run build
+#  artifacts:
+#    paths:
+#      - messenger-frontend/build/
+#    expire_in: 1 day
 
 frontend-test:
   image: node:${NODE_VERSION}-alpine
@@ -85,14 +85,10 @@ frontend-test:
     - npm ci ${NPM_CI_OPTS}
     - mkdir -p "${REPORTS_DIR}"
     - npm test -- --watchAll=false --coverage --reporters=jest-junit --reporters=default
-    # Добавить проверку существования файла
     - ls -la test-report/ || true
     - pwd
     - cp "${FRONTEND_DIR}/test-report/junit-test-results.xml" "${REPORTS_DIR}/frontend-junit.xml"
     - cp "${FRONTEND_DIR}/coverage/lcov.info" "${REPORTS_DIR}/frontend-lcov.info"
-    # Debug commands
-    - ls -la "${REPORTS_DIR}"
-    - cat "${REPORTS_DIR}/frontend-junit.xml"
   artifacts:
     reports:
       junit: "${REPORTS_DIR}/frontend-junit.xml"
