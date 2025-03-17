@@ -24,6 +24,3 @@ yarn-error.log*
 
 /test-report
 ci-reports/
-
-test-reports/
-!test-reports/.gitkeep
