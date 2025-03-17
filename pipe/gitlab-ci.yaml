@@ -125,5 +125,5 @@ sonar-check:
       -Dsonar.javascript.lcov.reportPaths=ci-reports/frontend-lcov.info
       -Dsonar.testExecutionReportPaths=ci-reports/frontend-junit.xml,**/target/surefire-reports/TEST-*.xml
       -Dsonar.qualitygate.wait=true
-    needs: [ "backend-test", "frontend-test" ]
+  needs: [ "backend-test", "frontend-test" ]
 
