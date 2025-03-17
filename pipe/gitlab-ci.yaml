@@ -99,24 +99,36 @@ frontend-test:
 
 # ------------------------- SONARQUBE ANALYSIS -------------------------
 sonar-check:
-  image: sonarsource/sonar-scanner-cli:latest
   stage: sonar-check
   tags:
     - messenger
+  image: sonarsource/sonar-scanner-cli:latest
+  variables:
+    SONAR_SCANNER_OPTS: "-Xmx512m"
   script:
+    - echo "Running SonarQube analysis for both projects"
+    # Анализ бэкенда
     - sonar-scanner
-      -Dsonar.projectKey=${SONAR_PROJECT_KEY}
-      -Dsonar.host.url=${SONAR_HOST_URL}
-      -Dsonar.login=${SONAR_TOKEN}
+      -Dsonar.projectKey=$SONAR_PROJECT_KEY
+      -Dsonar.projectName=Messenger
+      -Dsonar.host.url=$SONAR_HOST_URL
+      -Dsonar.login=$SONAR_TOKEN
       -Dsonar.sources=src/main/java
       -Dsonar.java.binaries=target/classes
       -Dsonar.tests=src/test/java
       -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
-      -Dsonar.javascript.lcov.reportPaths=${REPORTS_DIR}/frontend-lcov.info
-      -Dsonar.testExecutionReportPaths=${REPORTS_DIR}/frontend-junit.xml
-      -Dsonar.sourceEncoding=UTF-8
-      -Dsonar.java.source=17
-      -Dsonar.junit.reportPaths=${REPORTS_DIR}/frontend-junit.xml,target/surefire-reports/*.xml
+      -Dsonar.language=java
+    # Анализ фронтенда
+    - cd frontend
+    - sonar-scanner
+      -Dsonar.projectKey=$SONAR_PROJECT_KEY
+      -Dsonar.host.url=$SONAR_HOST_URL
+      -Dsonar.login=$SONAR_TOKEN
+      -Dsonar.sources=src
+      -Dsonar.tests=src
+      -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+      -Dsonar.testExecutionReportPaths=junit-test-results.xml
+      -Dsonar.language=js
   dependencies:
     - backend-test
     - frontend-test

@@ -17,8 +17,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --config=jest.config.js --watchAll=false --coverage",
-    "posttest": "echo 'Report generated at: ${PWD}/test-report/junit-test-results.xml'",
+    "test": "react-scripts test --coverage --watchAll=false --reporters=jest-junit",
+    "posttest": "mv junit-test-results.xml ../",
     "test:watch": "react-scripts test --watchAll",
     "eject": "react-scripts eject"
   },
