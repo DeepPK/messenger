@@ -86,11 +86,13 @@ frontend-test:
     BACKEND_URL: "http://backend:8080"
   script:
     - cd "${FRONTEND_DIR}"
-    - npm ci ${NPM_CI_OPTS}
-    - mkdir -p test-report
-    - npm test
-    - ls -la test-report/
-    - cp test-report/junit-test-results.xml "${REPORTS_DIR}/frontend-junit.xml" || echo "JUnit report not found"
+      - npm ci
+      - mkdir -p test-report
+      - chmod -R 777 test-report
+      - mkdir -p "${REPORTS_DIR}"
+      - npm test -- --coverage --watchAll=false --reporters=jest-junit --testResultsProcessor=jest-junit --outputFile=test-report/junit-test-results.xml
+      - cp test-report/junit-test-results.xml "${REPORTS_DIR}/frontend-junit.xml" || echo "JUnit report not found"
+      - cp coverage/lcov.info "${REPORTS_DIR}/frontend-lcov.info" || echo "LCov report not found"
   artifacts:
     reports:
       junit:
