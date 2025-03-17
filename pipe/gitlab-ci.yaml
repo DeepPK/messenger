@@ -100,7 +100,6 @@ sonar-check:
     SONAR_SCANNER_OPTS: "-Xmx512m"
   script:
     - echo "Running SonarQube analysis for both projects"
-    - echo "PROJECT_ROOT: ${PROJECT_ROOT}"
     - ls -la "${FRONTEND_DIR}/test-report"
     - ls -la "${FRONTEND_DIR}/coverage"
     - sonar-scanner
