@@ -13,8 +13,9 @@ variables:
   GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
   NODE_VERSION: "18"
   PROJECT_ROOT: "${CI_PROJECT_DIR}"
-  FRONTEND_DIR: "${PROJECT_ROOT}/messenger-frontend"
-  REPORTS_DIR: "${PROJECT_ROOT}/test-reports"
+  FRONTEND_DIR: "${CI_PROJECT_DIR}/messenger-frontend"
+  JUNIT_REPORT: "${CI_PROJECT_DIR}/frontend-junit-report.xml"
+  LCOV_REPORT: "${CI_PROJECT_DIR}/frontend-lcov.info"
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
@@ -72,18 +73,20 @@ frontend-test:
   variables:
     CI: "true"
   script:
+    - echo "Current directory: $(pwd)"
     - cd "${FRONTEND_DIR}"
     - npm ci --no-audit --prefer-offline
-    - mkdir -p "${FRONTEND_DIR}/test-report"
+    - mkdir -p test-report
     - npm test -- --watchAll=false --coverage --reporters=jest-junit --reporters=default
-    - cp "${FRONTEND_DIR}/test-report/junit-test-results.xml" "${REPORTS_DIR}/frontend-junit.xml"
-    - cp "${FRONTEND_DIR}/coverage/lcov.info" "${REPORTS_DIR}/frontend-lcov.info"
+    - ls -la test-report/  # Debug file locations
+    - cp test-report/junit-test-results.xml "${JUNIT_REPORT}"
+    - cp coverage/lcov.info "${LCOV_REPORT}"
   artifacts:
     reports:
-      junit: "${REPORTS_DIR}/frontend-junit.xml"
+      junit: "${JUNIT_REPORT}"
     paths:
       - "${FRONTEND_DIR}/coverage/"
-      - "${REPORTS_DIR}/frontend-lcov.info"
+      - "${LCOV_REPORT}"
 
 sonar-check:
   image: sonarsource/sonar-scanner-cli:latest
