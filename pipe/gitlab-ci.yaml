@@ -5,50 +5,42 @@ stages:
   - quality-check
 
 variables:
-  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
-  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
-  SONAR_PROJECT_KEY: "DeepPK_messenger_f896f465-8052-4d8a-bb95-1979ae24fdb5"
-  MAX_ATTEMPTS: "10"
-  SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
-  GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
-  NODE_VERSION: "18"
   PROJECT_ROOT: "${CI_PROJECT_DIR}"
-  FRONTEND_DIR: "${CI_PROJECT_DIR}/messenger-frontend"
-  JUNIT_REPORT: "${CI_PROJECT_DIR}/frontend-junit-report.xml"
-  LCOV_REPORT: "${CI_PROJECT_DIR}/frontend-lcov.info"
+  FRONTEND_DIR: "${PROJECT_ROOT}/messenger-frontend"
+  BACKEND_DIR: "${PROJECT_ROOT}"
+  REPORTS_DIR: "${PROJECT_ROOT}/ci-reports"
+  
+  # Maven settings
+  MAVEN_OPTS: "-Dmaven.repo.local=${PROJECT_ROOT}/.m2/repository"
+  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
+  
+  # Node settings
+  NODE_VERSION: "18"
+  NPM_CI_OPTS: "--no-audit --prefer-offline"
+  
+  # SonarQube
+  SONAR_PROJECT_KEY: "DeepPK_messenger_f896f465-8052-4d8a-bb95-1979ae24fdb5"
+  SONAR_USER_HOME: "${PROJECT_ROOT}/.sonar"
+  GIT_DEPTH: "0"
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
     - .m2/repository
-    - frontend/node_modules/
+    - messenger-frontend/node_modules/
 
+# ------------------------- BACKEND -------------------------
 backend-build:
   image: maven:3.8.6-openjdk-18
   stage: build
   tags:
     - messenger
   script:
-    - mvn $MAVEN_CLI_OPTS clean package -DskipTests
+    - cd "${BACKEND_DIR}"
+    - mvn ${MAVEN_CLI_OPTS} clean package -DskipTests
   artifacts:
     paths:
       - target/*.jar
-    expire_in: 1 day
-
-frontend-build:
-  image: node:${NODE_VERSION}-alpine
-  stage: build
-  tags:
-    - messenger
-  variables:
-    CI: "true"
-  script:
-    - cd messenger-frontend
-    - npm ci --no-audit --prefer-offline
-    - npm run build
-  artifacts:
-    paths:
-      - messenger-frontend/build/
     expire_in: 1 day
 
 backend-test:
@@ -57,13 +49,17 @@ backend-test:
   tags:
     - messenger
   script:
-    - mvn $MAVEN_CLI_OPTS test
+    - cd "${BACKEND_DIR}"
+    - mvn ${MAVEN_CLI_OPTS} test
     - mvn test jacoco:report
   artifacts:
     paths:
       - target/site/jacoco/jacoco.xml
     reports:
       junit: target/surefire-reports/*.xml
+
+# ------------------------- FRONTEND -------------------------
+# pipe/.gitlab-ci.yml
 
 frontend-test:
   image: node:${NODE_VERSION}-alpine
@@ -74,57 +70,59 @@ frontend-test:
     CI: "true"
   script:
     - cd "${FRONTEND_DIR}"
-    - npm ci --no-audit --prefer-offline
-    - mkdir -p test-report
-    - npm test -- --watchAll=false --coverage --reporters=jest-junit --reporters=default
-    #- ls -la test-report/  # Debug file locations
-    #- cp test-report/junit-test-results.xml "${JUNIT_REPORT}"
-    #- cp coverage/lcov.info "${LCOV_REPORT}"
+    
+    # Clean previous reports
+    - rm -rf test-report coverage
+    
+    # Install dependencies
+    - npm ci ${NPM_CI_OPTS}
+    
+    # Run tests with explicit config
+    - npm test -- \
+      --watchAll=false \
+      --coverage \
+      --config=jest.config.js \
+      --reporters=jest-junit \
+      --reporters=default \
+      --testResultsProcessor=jest-junit
+    
+    # Debug generated files
+    #- echo "Current directory: $(pwd)"
+    - find . -name "junit-test-results.xml"
+    - ls -lR test-report
+    
+    # Copy reports with absolute paths
+    - mkdir -p "${REPORTS_DIR}"
+    - cp "${FRONTEND_DIR}/test-report/junit-test-results.xml" "${REPORTS_DIR}/frontend-junit.xml"
+    - cp "${FRONTEND_DIR}/coverage/lcov.info" "${REPORTS_DIR}/frontend-lcov.info"
+  
   artifacts:
     reports:
-      junit: "${JUNIT_REPORT}"
+      junit: "${REPORTS_DIR}/frontend-junit.xml"
     paths:
       - "${FRONTEND_DIR}/coverage/"
-      - "${LCOV_REPORT}"
+      - "${REPORTS_DIR}/frontend-lcov.info"
 
+# ------------------------- SONARQUBE ANALYSIS -------------------------
 sonar-check:
   image: sonarsource/sonar-scanner-cli:latest
   stage: sonar-check
   tags:
     - messenger
-  cache:
-    policy: pull-push
-    key: "sonar-cache-$CI_COMMIT_REF_SLUG"
-    paths:
-      - "${SONAR_USER_HOME}/cache"
-      - sonar-scanner/
-  variables:
-    SONAR_SCANNER_OPTS: "-Xmx512m"
   script:
-    - echo "Running SonarQube analysis for both projects"
-    - ls -la "${FRONTEND_DIR}/test-report"
-    - ls -la "${FRONTEND_DIR}/coverage"
     - sonar-scanner
-      -Dsonar.projectName=Messenger
-      -Dsonar.projectKey=$SONAR_PROJECT_KEY
-      -Dsonar.host.url=$SONAR_HOST_URL
-      -Dsonar.login=$SONAR_TOKEN
+      -Dsonar.projectKey=${SONAR_PROJECT_KEY}
+      -Dsonar.host.url=${SONAR_HOST_URL}
+      -Dsonar.login=${SONAR_TOKEN}
       -Dsonar.sources=src/main/java
       -Dsonar.java.binaries=target/classes
-      -Dsonar.tests=src/test/java/ru/khkhlv
+      -Dsonar.tests=src/test/java
       -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
-      -Dsonar.qualitygate.wait=true
-      -Dsonar.javascript.lcov.reportPaths="${REPORTS_DIR}/frontend-lcov.info"
-      -Dsonar.testExecutionReportPaths="${REPORTS_DIR}/frontend-junit.xml"
-    - cd messenger-frontend
-    - sonar-scanner
-      -Dsonar.projectKey=$SONAR_PROJECT_KEY
-      -Dsonar.host.url=$SONAR_HOST_URL
-      -Dsonar.login=$SONAR_TOKEN
-      -Dsonar.sources=src
-      -Dsonar.tests=src
-      -Dsonar.javascript.lcov.reportPaths=messenger-frontend/lcov.info
-      -Dsonar.testExecutionReportPaths=test-reports/junit-test-results.xml
+      -Dsonar.javascript.lcov.reportPaths=${REPORTS_DIR}/frontend-lcov.info
+      -Dsonar.testExecutionReportPaths=${REPORTS_DIR}/frontend-junit.xml
+      -Dsonar.sourceEncoding=UTF-8
+      -Dsonar.java.source=17
+      -Dsonar.junit.reportPaths=${REPORTS_DIR}/frontend-junit.xml,target/surefire-reports/*.xml
   dependencies:
     - backend-test
     - frontend-test
@@ -134,6 +132,7 @@ sonar-check:
     - if: $CI_COMMIT_BRANCH == 'main'
     - if: $CI_COMMIT_BRANCH == 'develop'
 
+# ------------------------- QUALITY GATE CHECK -------------------------
 check-metrics:
   image: alpine:latest
   stage: quality-check
@@ -141,40 +140,38 @@ check-metrics:
     - messenger
   script:
     - apk update && apk add curl jq
-    - sleep 30
     - |
       ATTEMPT=0
-      MAX_ATTEMPTS=15  # Увеличено до 15 попыток
-      PROJECT_KEY="$SONAR_PROJECT_KEY"
-      COVERAGE="null"
-
-      # Ожидаем данные о покрытии
-       while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
-        RESPONSE=$(curl -s -u "$SONAR_TOKEN": "$SONAR_URL")
-        COVERAGE=$(echo "$RESPONSE" | jq -r '.component.measures[0].value')
+      MAX_ATTEMPTS=15
+      PROJECT_KEY="${SONAR_PROJECT_KEY}"
+      
+      # Проверка покрытия кода
+      while [ ${ATTEMPT} -lt ${MAX_ATTEMPTS} ]; do
+        RESPONSE=$(curl -s -u "${SONAR_TOKEN}:" "${SONAR_HOST_URL}/api/measures/component?component=${PROJECT_KEY}&metricKeys=coverage")
+        COVERAGE=$(echo "${RESPONSE}" | jq -r '.component.measures[0].value')
         
-        if [ "$COVERAGE" != "null" ]; then
-          echo "Coverage received: $COVERAGE%"
-          break
-        fi
+        [ "${COVERAGE}" != "null" ] && break
         
-        echo "Waiting for coverage data... (attempt $((ATTEMPT+1))"
+        echo "Waiting for coverage data... (attempt $((ATTEMPT+1)))"
         sleep 15
         ATTEMPT=$((ATTEMPT+1))
       done
 
-      if [ "$COVERAGE" = "null" ]; then
-        echo "ERROR: Failed to get coverage after $MAX_ATTEMPTS attempts"
+      # Проверка критических уязвимостей
+      CRITICAL_ISSUES=$(curl -s -u "${SONAR_TOKEN}:" "${SONAR_HOST_URL}/api/issues/search?componentKeys=${PROJECT_KEY}&severities=CRITICAL" | jq -r '.total')
+      
+      # Проверка условий
+      if [ "${COVERAGE}" = "null" ]; then
+        echo "ERROR: Failed to get coverage after ${MAX_ATTEMPTS} attempts"
         exit 1
       fi
 
-      if [ $(echo "$COVERAGE < 80" | bc) -eq 1 ]; then
-        echo "Code coverage $COVERAGE% < 80%"
+      if [ $(echo "${COVERAGE} < 80" | bc) -eq 1 ]; then
+        echo "Code coverage ${COVERAGE}% < 80%"
         exit 1
       fi
 
-      CRITICAL_ISSUES=$(curl -s -u "$SONAR_TOKEN": "$SONAR_HOST_URL/api/issues/search?componentKeys=$PROJECT_KEY&severities=CRITICAL" | jq -r '.total')
-      if [ "$CRITICAL_ISSUES" -gt 0 ]; then
-        echo "Found $CRITICAL_ISSUES critical issues"
+      if [ "${CRITICAL_ISSUES}" -gt 0 ]; then
+        echo "Found ${CRITICAL_ISSUES} critical issues"
         exit 1
       fi
