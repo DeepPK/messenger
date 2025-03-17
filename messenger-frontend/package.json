@@ -35,6 +35,14 @@
     "collectCoverage": true,
     "coverageReporters": ["lcov", "cobertura", "text"],
     "coverageDirectory": "coverage",
+    "testResultsProcessor": "jest-junit",
+    "reporters": [
+      "default",
+      ["jest-junit", {
+        "outputDirectory": "ci-reports",
+        "outputName": "frontend-junit.xml"
+      }]
+    ],
     "testEnvironment": "jsdom",
     "moduleNameMapper": {
       "\\.(css|less|scss|sass)$": "identity-obj-proxy"

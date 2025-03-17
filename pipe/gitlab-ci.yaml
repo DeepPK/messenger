@@ -92,7 +92,9 @@ frontend-test:
     - npm ci ${NPM_CI_OPTS}
     - npm install jest-junit --save-dev
     - mkdir -p "${REPORTS_DIR}"
-    - npm test -- --coverage --watchAll=false --testLocationInResults --reporters=jest-junit --testResultsProcessor=jest-junit --outputFile="${REPORTS_DIR}/frontend-junit.xml"
+    - npm test -- --coverage --watchAll=false --testLocationInResults --reporters=jest-junit --testResultsProcessor=jest-junit --outputFile="${PROJECT_ROOT}/ci-reports/frontend-junit.xml"
+      # Проверка существования файлов
+    - ls -la "${PROJECT_ROOT}/ci-reports/"
     - cp coverage/lcov.info "${REPORTS_DIR}/frontend-lcov.info"
   artifacts:
     paths:

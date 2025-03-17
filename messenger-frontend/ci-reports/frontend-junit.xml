@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="6" failures="0" errors="0" time="5.053">
+<testsuites name="jest tests" tests="6" failures="0" errors="0" time="4.984">
   <testsuite name="MessageSearch" errors="0" failures="0" skipped="0" timestamp="2025-03-17T21:55:52" time="3.302" tests="1">
     <testcase classname="MessageSearch triggers search on input" name="MessageSearch triggers search on input" time="0.071">
     </testcase>
