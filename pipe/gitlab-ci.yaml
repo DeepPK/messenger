@@ -84,12 +84,16 @@ frontend-test:
     - cd "${FRONTEND_DIR}"
     - npm ci ${NPM_CI_OPTS}
     - mkdir -p test-report
+    - echo "Current directory: $(pwd)"
     - npm test
     - ls -la test-report/
-    - ls -la "${REPORTS_DIR}/"
+    - ls -la "${FRONTEND_DIR}/test-report/"
+    - cp "${FRONTEND_DIR}/test-report/junit-test-results.xml" "${REPORTS_DIR}/frontend-junit.xml" || echo "Report copy failed"
   artifacts:
     reports:
-      junit: "${FRONTEND_DIR}/test-report/junit-test-results.xml"
+      junit:
+        - "${FRONTEND_DIR}/test-report/junit-test-results.xml"
+        - "${REPORTS_DIR}/frontend-junit.xml"
     paths:
       - "${FRONTEND_DIR}/coverage/"
       - "${REPORTS_DIR}/"

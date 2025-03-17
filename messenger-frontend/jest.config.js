@@ -6,7 +6,7 @@ module.exports = {
     [
       'jest-junit',
       {
-        outputDirectory: path.join(__dirname, 'test-report'),
+        outputDirectory: path.join(process.cwd(), 'test-report'),
         outputName: 'junit-test-results.xml',
         suiteName: 'Jest Tests'
       }
@@ -14,7 +14,7 @@ module.exports = {
   ],
   collectCoverage: true,
   coverageReporters: ['lcov', 'text'],
-  coverageDirectory: path.join(__dirname, 'coverage'),
+  coverageDirectory: './coverage',
   testEnvironment: 'jsdom',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1'

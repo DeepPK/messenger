@@ -17,8 +17,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --coverage --watchAll=false --reporters=jest-junit --testResultsProcessor=jest-junit --outputFile=./test-report/junit-test-results.xml",
-    "posttest": "mkdir -p ../ci-reports && cp test-report/junit-test-results.xml ../ci-reports/frontend-junit.xml",
+    "test": "react-scripts test --coverage --watchAll=false",
+    "posttest": "mkdir -p ../ci-reports && cp ./test-report/junit-test-results.xml ../ci-reports/frontend-junit.xml || echo 'No test report found'",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -46,7 +46,7 @@
     "@testing-library/user-event": "^14.6.1",
     "babel-jest": "^29.7.0",
     "identity-obj-proxy": "^3.0.0",
-    "jest-junit": "^15.0.0",
+    "jest-junit": "^16.0.0",
     "react-scripts": "5.0.0"
   }
 }
