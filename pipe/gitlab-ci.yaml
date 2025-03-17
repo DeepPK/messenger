@@ -94,14 +94,14 @@ frontend-test:
     - mkdir -p "${REPORTS_DIR}"
     - npm test -- --coverage --watchAll=false --testLocationInResults --reporters=jest-junit --testResultsProcessor=jest-junit --outputFile="${PROJECT_ROOT}/ci-reports/frontend-junit.xml"
       # Проверка существования файлов
-    - ls -la "${PROJECT_ROOT}/ci-reports/"
+    - ls -la "${PROJECT_ROOT}/messenger-frontend/ci-reports/"
     - cp coverage/lcov.info "${REPORTS_DIR}/frontend-lcov.info"
   artifacts:
     paths:
       - "${REPORTS_DIR}/frontend-lcov.info"
-      - "${REPORTS_DIR}/frontend-junit.xml"
+      - "${REPORTS_DIR}/messenger-frontend/frontend-junit.xml"
     reports:
-      junit: "${REPORTS_DIR}/frontend-junit.xml"
+      junit: "${REPORTS_DIR}/messenger-frontend/frontend-junit.xml"
 
 # ------------------------- SONARQUBE ANALYSIS -------------------------
 sonar-check:
@@ -123,7 +123,7 @@ sonar-check:
       -Dsonar.java.binaries=target/classes
       -Dsonar.coverage.jacoco.xmlReportPaths=ci-reports/backend-jacoco.xml
       -Dsonar.javascript.lcov.reportPaths=ci-reports/frontend-lcov.info
-      -Dsonar.testExecutionReportPaths=ci-reports/frontend-junit.xml,**/target/surefire-reports/TEST-*.xml
+      -Dsonar.testExecutionReportPaths=/messenger-frontend/ci-reports/frontend-junit.xml,**/target/surefire-reports/TEST-*.xml
       -Dsonar.qualitygate.wait=true
-    needs: [ "backend-test", "frontend-test" ]
+  needs: [ "backend-test", "frontend-test" ]
 
