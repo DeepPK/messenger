@@ -71,15 +71,16 @@ frontend-test:
   script:
     - cd messenger-frontend
     - npm ci --no-audit --prefer-offline
-    - mkdir -p reports
-    - npm test
-    - cp coverage/lcov.info lcov.info
+    - mkdir -p test-report
+    - npm test -- --watchAll=false --coverage --reporters=jest-junit --reporters=default
+    - cp test-report/junit-test-results.xml ../frontend-junit-report.xml
+    - cp coverage/lcov.info ../frontend-lcov.info
   artifacts:
     reports:
-      junit: test-reports/junit-test-results.xml
+      junit: frontend-junit-report.xml
     paths:
       - messenger-frontend/coverage/
-      - messenger-frontend/lcov.info
+      - messenger-frontend-lcov.info
 
 sonar-check:
   image: sonarsource/sonar-scanner-cli:latest
@@ -106,7 +107,8 @@ sonar-check:
       -Dsonar.tests=src/test/java/ru/khkhlv
       -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
       -Dsonar.qualitygate.wait=true
-      -Dsonar.language=java
+      -Dsonar.javascript.lcov.reportPaths=frontend-lcov.info
+      -Dsonar.testExecutionReportPaths=frontend-junit-report.xml
     - cd messenger-frontend
     - sonar-scanner
       -Dsonar.projectKey=$SONAR_PROJECT_KEY
