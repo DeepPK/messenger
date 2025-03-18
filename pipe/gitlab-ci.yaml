@@ -28,6 +28,7 @@ variables:
   DOCKER_HOST: tcp://docker-host:2375
   DOCKER_TLS_CERTDIR: ""
   KUBECONFIG: "/root/.kube/config"
+  DOCKER_DRIVER: overlay2
 
 
 cache:
@@ -160,6 +161,8 @@ deploy:
       command: ["--tls=false", "--host=tcp://0.0.0.0:2375"]
   before_script:
     - apk add --no-cache curl kubectl
+    - modprobe ip_tables || true
+    - modprobe nf_tables || true
     - mkdir -p /root/.docker /root/.kube /root/.minikube/profiles/minikube
 
     # Загрузка сертификатовb
