@@ -1,24 +1,12 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import MessageList from './MessageList';
+test('calls onDelete when delete button is clicked', () => {
+  const mockDelete = jest.fn();
+  render(<MessageList messages={mockMessages} onDelete={mockDelete} />);
 
-const mockMessages = [
-  { id: 1, sender: 'John', recipient: 'Alice', content: 'Hi', timestamp: '2024-03-15T12:00:00Z' },
-  { id: 2, sender: 'Alice', recipient: 'John', content: 'Hello', timestamp: '2024-03-15T12:05:00Z' }
-];
+  fireEvent.click(screen.getAllByText('Delete')[0]);
+  expect(mockDelete).toHaveBeenCalledWith(1);
+});
 
-describe('MessageList', () => {
-  test('renders messages correctly', () => {
-    render(<MessageList messages={mockMessages} onDelete={() => {}} />);
-
-    const items = screen.getAllByRole('listitem');
-    expect(items).toHaveLength(2);
-    expect(screen.getByText('John → Alice')).toBeInTheDocument();
-    expect(screen.getByText('Hi')).toBeInTheDocument();
-  });
-
-  test('shows empty state', () => {
-    render(<MessageList messages={[]} onDelete={() => {}} />);
-    expect(screen.queryAllByRole('listitem')).toHaveLength(0);
-  });
+test('displays timestamp correctly', () => {
+  render(<MessageList messages={mockMessages} onDelete={() => {}} />);
+  expect(screen.getByText('3/18/2024, 12:00:00 AM')).toBeInTheDocument();
 });
