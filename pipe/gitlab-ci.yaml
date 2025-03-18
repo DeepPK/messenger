@@ -55,6 +55,7 @@ backend-test:
     - cd "${BACKEND_DIR}"
     - mvn ${MAVEN_CLI_OPTS} clean verify
     - ls -la target/site/jacoco/
+    - ls -la target/classes/
     - mvn surefire-report:report
     - mkdir -p "${REPORTS_DIR}"
     - cp target/site/jacoco/jacoco.xml "${REPORTS_DIR}/backend-jacoco.xml"
@@ -62,6 +63,7 @@ backend-test:
   artifacts:
     paths:
       - "${REPORTS_DIR}/*.xml"
+      - "target/classes/
     reports:
       junit:
         - "${REPORTS_DIR}/TEST-*.xml"
@@ -131,7 +133,7 @@ sonar-check:
       -Dsonar.host.url=$SONAR_HOST_URL
       -Dsonar.login=$SONAR_TOKEN
       -Dsonar.sources=src/main/java,messenger-frontend/src
-      -Dsonar.java.binaries=target/classes
+      -Dsonar.java.binaries=${PROJECT_ROOT}/target/classes
       -Dsonar.coverage.jacoco.xmlReportPaths=messenger-frontend/ci-reports/backend-jacoco.xml
       -Dsonar.javascript.lcov.reportPaths=messenger-frontend/ci-reports/frontend-lcov.info
       -Dsonar.testExecutionReportPaths=**/target/surefire-reports/TEST-*.xml
