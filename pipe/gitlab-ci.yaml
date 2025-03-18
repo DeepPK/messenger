@@ -168,7 +168,7 @@ deploy:
     - echo "$CLIENT_KEY" | base64 -d > /root/.minikube/profiles/minikube/client.key
     - chmod 600 /root/.minikube/profiles/minikube/*
 
-    # Настройка kubeconfig
+    # Настройка kubeconfigb
     - kubectl config set-cluster minikube --server=https://${MINIKUBE_IP}:8443 --certificate-authority=/root/.minikube/ca.crt
     - kubectl config set-credentials minikube --client-certificate=/root/.minikube/profiles/minikube/client.crt --client-key=/root/.minikube/profiles/minikube/client.key
     - kubectl config set-context minikube --cluster=minikube --user=minikube --namespace=messenger
