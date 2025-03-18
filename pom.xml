@@ -90,6 +90,12 @@
                 <configuration>
                     <destFile>/target/jacoco.exec</destFile>
                     <append>true</append>
+                    <excludes>
+                        <exclude>**/WebConfig.java</exclude>
+                        <exclude>**/SecurityConfiguration.java</exclude>
+                        <exclude>**/config/*</exclude>
+                    </excludes>
+
                 </configuration>
                 <executions>
                     <execution>

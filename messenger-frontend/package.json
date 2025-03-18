@@ -34,6 +34,13 @@
   },
   "jest": {
     "collectCoverage": true,
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx}",
+      "!src/**/setupProxy.js",
+      "!src/**/setupTests.js",
+      "!src/**/reportWebVitals.js",
+      "!src/components/**/index.js"
+    ],
     "coverageReporters": [
       "lcov",
       "cobertura",

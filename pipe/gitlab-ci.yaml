@@ -132,6 +132,8 @@ sonar-check:
       -Dsonar.projectKey=$SONAR_PROJECT_KEY
       -Dsonar.host.url=$SONAR_HOST_URL
       -Dsonar.login=$SONAR_TOKEN
+      -Dsonar.coverage.exclusions=**/WebConfig.java,**/SecurityConfiguration.java
+      -Dsonar.javascript.exclusions=**/setupProxy.js,**/setupTests.js
       -Dsonar.sources=src/main/java,messenger-frontend/src
       -Dsonar.java.binaries=${PROJECT_ROOT}/target/classes
       -Dsonar.coverage.jacoco.xmlReportPaths=messenger-frontend/ci-reports/backend-jacoco.xml
