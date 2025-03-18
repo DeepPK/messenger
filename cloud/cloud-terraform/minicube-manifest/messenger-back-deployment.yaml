@@ -21,6 +21,8 @@ spec:
       labels:
         app: spring-app
     spec:
+      imagePullSecrets:
+        - name: dockerhub-secret
       containers:
         - env:
             - name: SERVER_ADDRESS
@@ -43,7 +45,7 @@ spec:
               value: "true"
             - name: MANAGEMENT.ENDPOINTS.WEB.CORS.ALLOWED-ORIGINS
               value: "*"
-          image: 192.168.49.2:5000/messenger:1.0
+          image: deepk10/messenger:1.0
           name: backend
           ports:
             - containerPort: 8080
