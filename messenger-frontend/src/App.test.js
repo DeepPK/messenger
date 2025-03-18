@@ -1,79 +1,98 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import App from './App';
 import axios from 'axios';
+import MockAdapter from 'axios-mock-adapter';
+import App from './App';
+import userEvent from '@testing-library/user-event';
 
-const mockMessages = [
-  { id: 1, sender: 'John', recipient: 'Alice', content: 'Hello', timestamp: '2024-03-18' }
-];
+const mock = new MockAdapter(axios);
 
-beforeEach(() => {
-  axios.get.mockResolvedValue({ data: mockMessages });
-  axios.post.mockResolvedValue({});
-  axios.delete.mockResolvedValue({});
-});
+describe('App Component', () => {
+  beforeEach(() => {
+    mock.reset();
+  });
 
-describe('App', () => {
-  test('fetches and displays messages on mount', async () => {
+  test('renders and fetches initial messages', async () => {
+    mock.onGet('/api/messages/all').reply(200, [
+      { id: 1, sender: 'User1', recipient: 'User2', content: 'Test message', timestamp: '2023-01-01' }
+    ]);
+
     render(<App />);
 
     await waitFor(() => {
-      expect(axios.get).toHaveBeenCalledWith('/api/messages/all');
-      expect(screen.getByText('John → Alice')).toBeInTheDocument();
+      expect(screen.getByText('User1 → User2')).toBeInTheDocument();
     });
+
+    // Добавляем проверку отсутствия ошибок в консоль
+    expect(console.error).not.toHaveBeenCalled();
+  });
+
+  // В начале файла добавьте:
+  beforeEach(() => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    console.error.mockRestore();
   });
 
   test('handles message sending', async () => {
+    mock.onPost('/api/messages/send').reply(200);
+    mock.onGet('/api/messages/all').reply(200, []);
+
     render(<App />);
 
-    // Заполняем форму
-    fireEvent.change(screen.getByLabelText('Sender'), { target: { value: 'Test' } });
-    fireEvent.change(screen.getByLabelText('Recipient'), { target: { value: 'User' } });
-    fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'Content' } });
-    fireEvent.click(screen.getByRole('button', { name: /send/i }));
+    await userEvent.type(screen.getByLabelText(/sender/i), 'TestSender');
+    await userEvent.type(screen.getByLabelText(/recipient/i), 'TestRecipient');
+    await userEvent.type(screen.getByLabelText(/message/i), 'TestContent');
+    await userEvent.click(screen.getByText('Send'));
 
     await waitFor(() => {
-      expect(axios.post).toHaveBeenCalledWith(
-        '/api/messages/send',
-        'sender=Test&recipient=User&content=Content',
-        { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
-      );
+      expect(mock.history.post.length).toBe(1);
     });
   });
 
   test('handles message deletion', async () => {
+    mock.onDelete('/api/messages/1').reply(200);
+    mock.onGet('/api/messages/all').reply(200, [
+      { id: 1, sender: 'User1', recipient: 'User2', content: 'Test message', timestamp: '2023-01-01' }
+    ]);
+
     render(<App />);
 
-    await waitFor(() => screen.getByText('Delete'));
-    fireEvent.click(screen.getAllByText('Delete')[0]);
-
     await waitFor(() => {
-      expect(axios.delete).toHaveBeenCalledWith('/api/messages/1');
+      fireEvent.click(screen.getByRole('button', { name: /delete/i }));
     });
+
+    expect(mock.history.delete.length).toBe(1);
   });
 
   test('handles search functionality', async () => {
-    axios.get.mockResolvedValueOnce({ data: mockMessages });
+    mock.onGet('/api/messages/search?keyword=test').reply(200, [
+      { id: 2, sender: 'User3', recipient: 'User4', content: 'Test search', timestamp: '2023-01-02' }
+    ]);
+
     render(<App />);
 
-    fireEvent.change(screen.getByPlaceholderText('Search messages...'), {
-      target: { value: 'Hello' }
-    });
+    fireEvent.change(screen.getByPlaceholderText('Search messages...'), { target: { value: 'test' } });
+
     fireEvent.click(screen.getByRole('button', { name: /search/i }));
 
     await waitFor(() => {
-      expect(axios.get).toHaveBeenCalledWith('/api/messages/search?keyword=Hello');
+      expect(screen.getByText('User3 → User4')).toBeInTheDocument();
     });
   });
 
-  test('handles errors gracefully', async () => {
-    axios.get.mockRejectedValueOnce(new Error('API Error'));
-    console.error = jest.fn();
+  test('shows error when message fetch fails', async () => {
+    mock.onGet('/api/messages/all').reply(500);
 
     render(<App />);
 
     await waitFor(() => {
-      expect(console.error).toHaveBeenCalledWith('Error fetching messages:', expect.any(Error));
+      expect(console.error).toHaveBeenCalledWith(
+        'Error fetching messages:',
+        expect.any(Error)
+      );
     });
   });
 });

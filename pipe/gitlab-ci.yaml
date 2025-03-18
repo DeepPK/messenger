@@ -2,6 +2,7 @@ stages:
   #- build
   - test
   - sonar-check
+  - deploy
 
 variables:
   PROJECT_ROOT: "${CI_PROJECT_DIR}"
@@ -100,8 +101,7 @@ frontend-test:
       --watchAll=false \
       --reporters=jest-junit \
       --testResultsProcessor=jest-junit \
-      --outputFile=ci-reports/raw-report.xml \
-      "src/**/*.test.js"
+      --outputFile=ci-reports/raw-report.xml
     - test -f "${REPORTS_DIR}/raw-report.xml" || exit 1
     - test -f "sonar-transform.xslt" || exit 1
     - xsltproc "sonar-transform.xslt" "${REPORTS_DIR}/raw-report.xml" > "${REPORTS_DIR}/frontend-junit.xml"
