@@ -212,4 +212,4 @@ deploy:
       # Дополнительные проверки
       kubectl get pods -o wide -n messenger
       kubectl get services -n messenger
-  needs: ["sonar-check"]
+  needs: ["sonar-check", "backend-build", "frontend-build"]
