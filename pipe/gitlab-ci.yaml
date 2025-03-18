@@ -162,7 +162,7 @@ deploy:
     - apk add --no-cache curl kubectl
     - mkdir -p /root/.docker /root/.kube /root/.minikube/profiles/minikube
 
-    # Загрузка сертификатов
+    # Загрузка сертификатовb
     - echo "$CA_CRT" | base64 -d > /root/.minikube/ca.crt
     - echo "$CLIENT_CRT" | base64 -d > /root/.minikube/profiles/minikube/client.crt
     - echo "$CLIENT_KEY" | base64 -d > /root/.minikube/profiles/minikube/client.key
