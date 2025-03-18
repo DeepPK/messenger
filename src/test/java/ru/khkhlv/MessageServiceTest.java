@@ -34,15 +34,23 @@ class MessageServiceTest {
 
     @Test
     void testSendMessage() {
-        Message message = new Message();
-        message.setContent("test");
-        when(messageRepository.save(any())).thenReturn(message);
+        // Настройка мока
+        when(messageRepository.save(any(Message.class))).thenAnswer(invocation -> {
+            Message msg = invocation.getArgument(0);
+            return msg; // Возвращаем модифицированный объект из сервиса
+        });
 
-        Message result = messageService.sendMessage("A", "B", "test");
+        // Вызов метода
+        Message result = messageService.sendMessage("Alice", "Bob", "Hello, Bob!");
 
+        // Проверки
+        assertNotNull(result);
+        assertEquals("Alice", result.getSender());
+        assertEquals("Bob", result.getRecipient());
+        assertEquals("Hello, Bob!", result.getContent());
         assertNotNull(result.getTimestamp());
-        assertEquals("test", result.getContent());
-        verify(messageRepository).save(any());
+
+        verify(messageRepository, times(1)).save(any(Message.class));
     }
 
     @Test
