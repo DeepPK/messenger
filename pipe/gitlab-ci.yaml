@@ -24,8 +24,8 @@ variables:
   #GIT_DEPTH: "0"
   
   # Miniqube
-  MINIKUBE_IP: "192.168.49.2"
-  REGISTRY: "${MINIKUBE_IP}:5000"
+  #MINIKUBE_IP: "192.168.49.2"
+  REGISTRY: "192.168.49.2:30500"
   DOCKER_HOST: tcp://docker-host:2375
   DOCKER_TLS_CERTDIR: ""
   KUBECONFIG: "/root/.kube/config"
@@ -180,43 +180,35 @@ deploy:
       command: ["--tls=false", "--host=tcp://0.0.0.0:2375"]
   before_script:
     - apk add --no-cache curl kubectl
-    - modprobe ip_tables || true
-    - modprobe nf_tables || true
-    - mkdir -p /root/.docker /root/.kube /root/.minikube/profiles/minikube
-
-    # Загрузка сертификатовb
-    - echo "$CA_CRT" | base64 -d > /root/.minikube/ca.crt
-    - echo "$CLIENT_CRT" | base64 -d > /root/.minikube/profiles/minikube/client.crt
-    - echo "$CLIENT_KEY" | base64 -d > /root/.minikube/profiles/minikube/client.key
-    - chmod 600 /root/.minikube/profiles/minikube/*
-
-    # Настройка kubeconfigb
-    - kubectl config set-cluster minikube --server=https://${MINIKUBE_IP}:8443 --certificate-authority=/root/.minikube/ca.crt
-    - kubectl config set-credentials minikube --client-certificate=/root/.minikube/profiles/minikube/client.crt --client-key=/root/.minikube/profiles/minikube/client.key
-    - kubectl config set-context minikube --cluster=minikube --user=minikube --namespace=messenger
-    - kubectl config use-context minikube
-
-    # Настройка Docker
     - mkdir -p /etc/docker
-    - echo '{"insecure-registries":["192.168.49.2:5000"]}' > /etc/docker/daemon.json
-    - echo "Перезапускаем Docker daemon"
-    - pkill -SIGHUP dockerd || true
-    - sleep 5
-    - kubectl port-forward -n kube-system service/registry 5000:80 --address=0.0.0.0 >/dev/null 2>&1 &
+    - |
+      echo '{"insecure-registries":["'${REGISTRY}'"]}' > /etc/docker/daemon.json
+      pkill -SIGHUP dockerd || true
+      sleep 3
+      
+      # Проброс портов (если требуется)
+      kubectl port-forward -n kube-system service/registry 5000:30500 >/dev/null 2>&1 &
+      sleep 5
+      
+      # Добавляем host.docker.internal для Linux
+      if ! grep -q "host.docker.internal" /etc/hosts; then
+      echo "`/sbin/ip route | awk '/default/ { print $3 }'` host.docker.internal" >> /etc/hosts
+      fi
   script:
     - sleep 5
     - |
-      curl -v http://${MINIKUBE_IP}:5000/v2/_catalog || true
+      ping -c 3 host.docker.internal
+      curl -v http://${REGISTRY}/v2/_catalog || true
       
       # Сборка образов
-      docker build -t ${MINIKUBE_IP}:5000/messenger:1.0 -f Dockerfile.back .
-      docker build -t ${MINIKUBE_IP}:5000/frontend:1.0 -f messenger-frontend/Dockerfile.front ./messenger-frontend
-      docker build -t ${MINIKUBE_IP}:5000/bot:1.0 -f Telegram_bot/Dockerfile.bot ./Telegram_bot
+      docker build -t ${REGISTRY}/messenger:1.0 -f Dockerfile.back .
+      docker build -t ${REGISTRY}/frontend:1.0 -f messenger-frontend/Dockerfile.front ./messenger-frontend
+      docker build -t ${REGISTRY}/bot:1.0 -f Telegram_bot/Dockerfile.bot ./Telegram_bot
       
       # Публикация образов
-      docker push ${MINIKUBE_IP}:5000/messenger:1.0
-      docker push ${MINIKUBE_IP}:5000/frontend:1.0
-      docker push ${MINIKUBE_IP}:5000/bot:1.0
+      docker push ${REGISTRY}/messenger:1.0
+      docker push ${REGISTRY}/frontend:1.0
+      docker push ${REGISTRY}/bot:1.0
       
       curl http://${REGISTRY}/v2/_catalog
       
