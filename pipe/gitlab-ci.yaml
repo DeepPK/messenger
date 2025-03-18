@@ -174,38 +174,37 @@ deploy:
 
     # Настройка Docker
     - echo "{\"insecure-registries\":[\"${MINIKUBE_IP}:5000\"]}" > /root/.docker/daemon.json
-
-    script:
-      - |
-        # Проверка окружения
-        docker info
-        kubectl cluster-info
-        
-        # Сборка образов
-        docker build -t ${MINIKUBE_IP}:5000/messenger:1.0 -f Dockerfile.back .
-        docker build -t ${MINIKUBE_IP}:5000/frontend:1.0 -f messenger-frontend/Dockerfile.front ./messenger-frontend
-        docker build -t ${MINIKUBE_IP}:5000/bot:1.0 -f Telegram_bot/Dockerfile.bot ./Telegram_bot
-        
-        # Публикация образов
-        docker push ${MINIKUBE_IP}:5000/messenger:1.0
-        docker push ${MINIKUBE_IP}:5000/frontend:1.0
-        docker push ${MINIKUBE_IP}:5000/bot:1.0
-        
-        # Применение манифестов
-        kubectl apply -f cloud/cloud-terraform/minicube-manifest/
-        
-        # Проверка статуса
-        kubectl rollout status deployment/messenger-back --timeout=180s
-        kubectl rollout status deployment/frontend --timeout=180s
-        kubectl rollout status deployment/bot --timeout=180s
-        
-        # Финальная проверка
-        kubectl get all,ingress -n messenger
-        echo "✅ Deployment successful!"
-        
-        # Дополнительные проверки
-        kubectl get pods -o wide -n messenger
-        kubectl get services -n messenger
+  script:
+    - |
+      # Проверка окружения
+      docker info
+      kubectl cluster-info
+      
+      # Сборка образов
+      docker build -t ${MINIKUBE_IP}:5000/messenger:1.0 -f Dockerfile.back .
+      docker build -t ${MINIKUBE_IP}:5000/frontend:1.0 -f messenger-frontend/Dockerfile.front ./messenger-frontend
+      docker build -t ${MINIKUBE_IP}:5000/bot:1.0 -f Telegram_bot/Dockerfile.bot ./Telegram_bot
+      
+      # Публикация образов
+      docker push ${MINIKUBE_IP}:5000/messenger:1.0
+      docker push ${MINIKUBE_IP}:5000/frontend:1.0
+      docker push ${MINIKUBE_IP}:5000/bot:1.0
+      
+      # Применение манифестов
+      kubectl apply -f cloud/cloud-terraform/minicube-manifest/
+      
+      # Проверка статуса
+      kubectl rollout status deployment/messenger-back --timeout=180s
+      kubectl rollout status deployment/frontend --timeout=180s
+      kubectl rollout status deployment/bot --timeout=180s
+      
+      # Финальная проверка
+      kubectl get all,ingress -n messenger
+      echo "✅ Deployment successful!"
+      
+      # Дополнительные проверки
+      kubectl get pods -o wide -n messenger
+      kubectl get services -n messenger
   # only:
   #   - main
   #needs: ["sonar-check"]
