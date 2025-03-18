@@ -105,6 +105,7 @@ frontend-test:
     - test -f "${REPORTS_DIR}/raw-report.xml" || exit 1
     - test -f "sonar-transform.xslt" || exit 1
     - xsltproc "sonar-transform.xslt" "${REPORTS_DIR}/raw-report.xml" > "${REPORTS_DIR}/frontend-junit.xml"
+    - cp coverage/lcov.info "${REPORTS_DIR}/frontend-lcov.info"
   artifacts:
     paths:
       - "${REPORTS_DIR}/frontend-lcov.info"
