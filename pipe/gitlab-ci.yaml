@@ -150,7 +150,7 @@ deploy:
     - messenger
   services:
     - name: docker:dind
-      alias: docker-host  # Алиас для Docker-in-Docker
+      alias: docker-host
   variables:
     DOCKER_HOST: tcp://docker-host:2375  # Подключение без TLS
     DOCKER_TLS_CERTDIR: ""
@@ -160,12 +160,13 @@ deploy:
     - apk add --no-cache curl kubectl  # Установка зависимостей
     - mkdir -p /root/.docker /root/.kube
     - echo "{\"insecure-registries\":[\"${MINIKUBE_IP}:5000\"]}" > /root/.docker/daemon.json
-    - echo "$KUBECONFIG_CONTENT" > $KUBECONFIG  # Подгрузка kubeconfig
+    - echo "$KUBECONFIG_CONTENT" | base64 -d > $KUBECONFIG
+    - chmod 600 $KUBECONFIG
+    - kubectl config view --raw
     - kubectl config use-context minikube  # Активация контекста
 
   script:
     - |
-      # Проверка подключений
       docker info || true
       kubectl cluster-info
 
