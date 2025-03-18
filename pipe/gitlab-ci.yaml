@@ -100,12 +100,12 @@ frontend-test:
       --watchAll=false \
       --reporters=jest-junit \
       --testResultsProcessor=jest-junit \
-      --outputFile=ci-reports/frontend-junit.xml \
+      --outputFile=ci-reports/raw-report.xml \
       "src/**/*.test.js"
-    - xsltproc "${FRONTEND_DIR}/sonar-transform.xslt" \
-      "${REPORTS_DIR}/raw-report.xml" \
-      > "${REPORTS_DIR}/frontend-junit.xml"
-    - cp coverage/lcov.info "${REPORTS_DIR}/frontend-lcov.info"
+    - test -f "${REPORTS_DIR}/raw-report.xml" || exit 1
+    - test -f "sonar-transform.xslt" || exit 1
+    - xsltproc "sonar-transform.xslt" "${REPORTS_DIR}/raw-report.xml" > "${REPORTS_DIR}/frontend-junit.xml"
+    - xmllint --noout "${REPORTS_DIR}/frontend-junit.xml"
   artifacts:
     paths:
       - "${REPORTS_DIR}/frontend-lcov.info"
