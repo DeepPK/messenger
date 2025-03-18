@@ -124,7 +124,7 @@ sonar-check:
   script:
     - echo "Проверка существования отчетов:"
     - apk add --no-cache libxslt
-    - sonar-scanner
+    - sonar-scanner -X
       -Dsonar.nodejs.executable=$(which node)
       -Dsonar.projectKey=$SONAR_PROJECT_KEY
       -Dsonar.host.url=$SONAR_HOST_URL
