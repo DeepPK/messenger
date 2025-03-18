@@ -158,23 +158,26 @@ deploy:
       alias: dind-service
   before_script:
     - apk add --no-cache curl kubectl
-      - mkdir -p /root/.docker /root/.kube /root/.minikube/profiles/minikube
-      
-      # Загрузка сертификатов
-      - echo "$CA_CRT" | base64 -d > /root/.minikube/ca.crt
-      - echo "$CLIENT_CRT" | base64 -d > /root/.minikube/profiles/minikube/client.crt
-      - echo "$CLIENT_KEY" | base64 -d > /root/.minikube/profiles/minikube/client.key
-      - chmod 600 /root/.minikube/profiles/minikube/*
-      
-      # Настройка kubeconfig
-      - kubectl config set-cluster minikube --server=https://${MINIKUBE_IP}:8443 --certificate-authority=/root/.minikube/ca.crt --insecure-skip-tls-verify=true
-      - kubectl config set-credentials minikube --client-certificate=/root/.minikube/profiles/minikube/client.crt --client-key=/root/.minikube/profiles/minikube/client.key
-      - kubectl config set-context minikube --cluster=minikube --user=minikube --namespace=messenger
-      - kubectl config use-context minikube
-      
-      # Настройка Docker
-      - echo "{\"insecure-registries\":[\"${MINIKUBE_IP}:5000\"]}" > /root/.docker/daemon.json
-      - kill -SIGHUP $(pidof dockerd)  # Перезагрузка конфига Docker
+    - mkdir -p /root/.docker /root/.kube /root/.minikube/profiles/minikube
+
+    # Загрузка сертификатов (убедитесь, что переменные CI содержат корректные base64-значения)
+    - echo "$CA_CRT" | base64 -d > /root/.minikube/ca.crt
+    - echo "$CLIENT_CRT" | base64 -d > /root/.minikube/profiles/minikube/client.crt
+    - echo "$CLIENT_KEY" | base64 -d > /root/.minikube/profiles/minikube/client.key
+    - chmod 600 /root/.minikube/profiles/minikube/*
+
+    # Настройка kubeconfig (без --insecure-skip-tls-verify)
+    - kubectl config set-cluster minikube --server=https://${MINIKUBE_IP}:8443 --certificate-authority=/root/.minikube/ca.crt
+    - kubectl config set-credentials minikube --client-certificate=/root/.minikube/profiles/minikube/client.crt --client-key=/root/.minikube/profiles/minikube/client.key
+    - kubectl config set-context minikube --cluster=minikube --user=minikube --namespace=messenger
+    - kubectl config use-context minikube
+
+    # Проверка сертификатов
+    - ls -la /root/.minikube/ca.crt
+    - ls -la /root/.minikube/profiles/minikube/
+
+    # Настройка Docker
+    - echo "{\"insecure-registries\":[\"${MINIKUBE_IP}:5000\"]}" > /root/.docker/daemon.json
   script:
     - |
       # Проверка окружения
