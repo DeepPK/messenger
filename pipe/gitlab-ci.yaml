@@ -158,7 +158,7 @@ deploy:
     - apk add --no-cache curl kubectl helm
     - mkdir -p /root/.docker /kube
     - echo "$KUBECONFIG_CONTENT" > $KUBECONFIG
-    - kubectl config set-cluster minikube --server=https://$MINIKUBE_IP:8443 --insecure-skip-tls -verify
+    - kubectl config set-cluster minikube --server=https://$MINIKUBE_IP:8443 --insecure-skip-tls-verify
   script:
     - |
       docker build -t  $MINIKUBE_IP:5000/messenger:1.0 -f Dockerfile.back .
