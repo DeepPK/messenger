@@ -200,15 +200,13 @@ deploy:
     - mkdir -p /etc/docker
     - echo '{"insecure-registries":["192.168.49.2:5000"]}' > /etc/docker/daemon.json
     - echo "Перезапускаем Docker daemon"
-    - kill -SIGHUP $(pidof dockerd)
+    - pkill -SIGHUP dockerd || true
     - sleep 5
+    - kubectl port-forward -n kube-system service/registry 5000:80 --address=0.0.0.0 >/dev/null 2>&1 &
   script:
-    - kubectl port-forward --namespace kube-system service/registry 5000:80 &
     - sleep 5
     - |
-      echo "Проверка доступа к регистру:"
-      curl -v http://192.168.49.2:5000/v2/_catalog || true
-      nc -zv 192.168.49.2 5000 || echo "Проверка порта 5000 failed"
+      curl -v http://${MINIKUBE_IP}:5000/v2/_catalog || true
       
       # Сборка образов
       docker build -t ${MINIKUBE_IP}:5000/messenger:1.0 -f Dockerfile.back .
