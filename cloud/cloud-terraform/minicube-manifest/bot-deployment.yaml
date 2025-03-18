@@ -1,0 +1,32 @@
+piVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose -f docker-compose.yml convert
+    kompose.version: 1.35.0 (9532ceef3)
+  labels:
+    io.kompose.service: bot
+  name: bot
+  namespace: messenger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: bot
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose -f docker-compose.yml convert
+        kompose.version: 1.35.0 (9532ceef3)
+      labels:
+        io.kompose.service: bot
+    spec:
+      containers:
+        - env:
+            - name: BACKEND_URL
+              value: http://10.102.70.93:8080/messages
+            - name: TOKEN
+              value: 7537054107:AAHwkBopAiYR0fleIogFq57wC2_Se5CxX5s
+          image: deepk10/telegram-bot:1.0
+          name: bot
+      restartPolicy: Always
