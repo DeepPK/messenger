@@ -27,7 +27,7 @@ cache:
   paths:
     - .m2/repository
     - target/classes/
-    - messenger-frontend/node_modules/
+    - messenger-frontend/node_modules
     - target/site/jacoco-aggregate/
 
 # ------------------------- BACKEND -------------------------
@@ -77,6 +77,7 @@ backend-test:
 #     - npm run build
 #   artifacts:
 #     paths:
+#       - messenger-frontend/node_modules/
 #       - messenger-frontend/build/
 #     expire_in: 1 day
 
@@ -97,7 +98,8 @@ frontend-test:
       --watchAll=false \
       --reporters=jest-junit \
       --testResultsProcessor=jest-junit \
-      --outputFile=ci-reports/frontend-junit.xml
+      --outputFile=ci-reports/frontend-junit.xml \
+      "src/**/*.test.js"
     - sed -i 's/<testsuites /<testExecutions version="1"/' "${REPORTS_DIR}/frontend-junit.xml"
     - sed -i 's/<\/testsuites>/<\/testExecutions>/' "${REPORTS_DIR}/frontend-junit.xml"
     - sed -i 's/<testsuite /<file path="/g' "${REPORTS_DIR}/frontend-junit.xml"
