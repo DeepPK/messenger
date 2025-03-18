@@ -25,13 +25,15 @@ spec:
       labels:
         io.kompose.service: app
     spec:
+      imagePullSecrets:
+        - name: dockerhub-secret
       containers:
         - env:
             - name: BACKEND_URL
               value: http://10.102.70.93:8080/
             - name: NODE_ENV
               value: production
-          image: 192.168.49.2:5000/frontend:1.0
+          image: deepk10/frontend:1.0
           name: frontend
           ports:
             - containerPort: 80
