@@ -194,8 +194,6 @@ deploy:
       kubectl get all -n messenger
       kubectl get ingress -n messenger
       echo "Deployment successful!"
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
   timeout: 20 minutes
   # only:
   #   - main
