@@ -88,7 +88,7 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.11</version>
                 <configuration>
-                    <destFile>/target/jacoco.exec</destFile>
+<!--                    <destFile>/target/jacoco.exec</destFile>-->
                     <append>true</append>
                 </configuration>
                 <executions>
@@ -99,6 +99,7 @@
                         </goals>
                         <configuration>
                             <propertyName>surefireArgLine</propertyName>
+                            <destFile>${project.build.directory}/jacoco.exec</destFile>
                         </configuration>
                     </execution>
                     <execution>
@@ -108,7 +109,8 @@
                             <goal>report</goal>
                         </goals>
                         <configuration>
-                            <formats>XML</formats> <!-- Явно указываем формат XML -->
+                            <outputDirectory>${project.reporting.outputDirectory}/jacoco</outputDirectory>
+                            <formats>XML</formats>
                         </configuration>
                     </execution>
                 </executions>

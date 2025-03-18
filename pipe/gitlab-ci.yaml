@@ -56,7 +56,7 @@ backend-test:
     - mvn ${MAVEN_CLI_OPTS} clean verify
     - mvn surefire-report:report
     - mkdir -p "${REPORTS_DIR}"
-    - cp target/site/jacoco-aggregate/jacoco.xml "${REPORTS_DIR}/backend-jacoco.xml"
+    - cp target/site/jacoco/jacoco.xml "${REPORTS_DIR}/backend-jacoco.xml"
     - cp target/surefire-reports/TEST-*.xml "${REPORTS_DIR}/"
   artifacts:
     paths:
