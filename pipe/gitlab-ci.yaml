@@ -155,7 +155,7 @@ deploy:
   stage: deploy
   image: docker:24.0
   tags:
-    - messenger
+    - dep
   services:
     - name: docker:dind
       alias: docker-host
