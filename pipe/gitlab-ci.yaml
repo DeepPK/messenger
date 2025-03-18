@@ -166,48 +166,46 @@ deploy:
     - echo "$CLIENT_KEY" | base64 -d > /root/.minikube/profiles/minikube/client.key
     - chmod 600 /root/.minikube/profiles/minikube/*
 
-    # Настройка kubeconfig
-    - kubectl config set-cluster minikube \
-        --server=https://${MINIKUBE_IP}:8443 \
-        --certificate-authority=/root/.minikube/ca.crt
-    - kubectl config set-credentials minikube \
-        --client-certificate=/root/.minikube/profiles/minikube/client.crt \
-        --client-key=/root/.minikube/profiles/minikube/client.key
-    - kubectl config set-context minikube \
-        --cluster=minikube \
-        --user=minikube \
-        --namespace=messenger
+    # Настройка kubeconfig (исправлено форматирование)
+    - kubectl config set-cluster minikube --server=https://${MINIKUBE_IP}:8443 --certificate-authority=/root/.minikube/ca.crt
+    - kubectl config set-credentials minikube --client-certificate=/root/.minikube/profiles/minikube/client.crt --client-key=/root/.minikube/profiles/minikube/client.key
+    - kubectl config set-context minikube --cluster=minikube --user=minikube --namespace=messenger
     - kubectl config use-context minikube
 
     # Настройка Docker
     - echo "{\"insecure-registries\":[\"${MINIKUBE_IP}:5000\"]}" > /root/.docker/daemon.json
-  script:
-    - |
-      # Проверка окружения
-      docker info
-      kubectl cluster-info
 
-      # Сборка образов
-      docker build -t ${MINIKUBE_IP}:5000/messenger:1.0 -f Dockerfile.back .
-      docker build -t ${MINIKUBE_IP}:5000/frontend:1.0 -f messenger-frontend/Dockerfile.front ./messenger-frontend
-      docker build -t ${MINIKUBE_IP}:5000/bot:1.0 -f Telegram_bot/Dockerfile.bot ./Telegram_bot
-
-      # Публикация образов
-      docker push ${MINIKUBE_IP}:5000/messenger:1.0
-      docker push ${MINIKUBE_IP}:5000/frontend:1.0
-      docker push ${MINIKUBE_IP}:5000/bot:1.0
-
-      # Применение манифестов
-      kubectl apply -f cloud/cloud-terraform/minicube-manifest/
-
-      # Проверка статуса
-      kubectl rollout status deployment/messenger-back --timeout=180s
-      kubectl rollout status deployment/frontend --timeout=180s
-      kubectl rollout status deployment/bot --timeout=180s
-      
-      # Финальная проверка
-      kubectl get all,ingress -n messenger
-      echo "✅ Deployment successful!"
+    script:
+      - |
+        # Проверка окружения
+        docker info
+        kubectl cluster-info
+        
+        # Сборка образов
+        docker build -t ${MINIKUBE_IP}:5000/messenger:1.0 -f Dockerfile.back .
+        docker build -t ${MINIKUBE_IP}:5000/frontend:1.0 -f messenger-frontend/Dockerfile.front ./messenger-frontend
+        docker build -t ${MINIKUBE_IP}:5000/bot:1.0 -f Telegram_bot/Dockerfile.bot ./Telegram_bot
+        
+        # Публикация образов
+        docker push ${MINIKUBE_IP}:5000/messenger:1.0
+        docker push ${MINIKUBE_IP}:5000/frontend:1.0
+        docker push ${MINIKUBE_IP}:5000/bot:1.0
+        
+        # Применение манифестов
+        kubectl apply -f cloud/cloud-terraform/minicube-manifest/
+        
+        # Проверка статуса
+        kubectl rollout status deployment/messenger-back --timeout=180s
+        kubectl rollout status deployment/frontend --timeout=180s
+        kubectl rollout status deployment/bot --timeout=180s
+        
+        # Финальная проверка
+        kubectl get all,ingress -n messenger
+        echo "✅ Deployment successful!"
+        
+        # Дополнительные проверки
+        kubectl get pods -o wide -n messenger
+        kubectl get services -n messenger
   # only:
   #   - main
   #needs: ["sonar-check"]
