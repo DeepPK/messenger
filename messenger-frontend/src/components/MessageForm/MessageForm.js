@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
+import PropTypes from 'prop-types';
 
 const MessageForm = ({ onSend }) => {
     const [sender, setSender] = useState('');
@@ -67,6 +68,10 @@ const MessageForm = ({ onSend }) => {
             </Form>
         </div>
     );
+};
+
+MessageForm.propTypes = {
+  onSend: PropTypes.func.isRequired
 };
 
 export default MessageForm;

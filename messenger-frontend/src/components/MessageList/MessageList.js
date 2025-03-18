@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { ListGroup, Badge, Button } from 'react-bootstrap';
 
 const MessageList = ({ messages, onDelete }) => {
@@ -10,7 +11,7 @@ const MessageList = ({ messages, onDelete }) => {
                     <ListGroup.Item
                         key={message.id}
                         as="li"
-                        role="listitem"
+                        role="<li>"
                         className="d-flex justify-content-between align-items-start"
                     >
                         <div className="ms-2 me-auto">
@@ -35,6 +36,22 @@ const MessageList = ({ messages, onDelete }) => {
             </ListGroup>
         </div>
     );
+};
+
+MessageList.propTypes = {
+    messages: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+            sender: PropTypes.string.isRequired,
+            recipient: PropTypes.string.isRequired,
+            content: PropTypes.string.isRequired,
+            timestamp: PropTypes.oneOfType([
+                PropTypes.string,
+                PropTypes.instanceOf(Date)
+            ]).isRequired
+        })
+    ).isRequired,
+    onDelete: PropTypes.func.isRequired
 };
 
 export default MessageList;
