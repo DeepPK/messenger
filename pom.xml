@@ -107,6 +107,9 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                        <configuration>
+                            <formats>XML</formats> <!-- Явно указываем формат XML -->
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
