@@ -88,6 +88,8 @@ frontend-test:
     - messenger
   variables:
     CI: "true"
+  before_script:
+    - apk add --no-cache libxslt
   script:
     - cd "${FRONTEND_DIR}"
     - npm ci ${NPM_CI_OPTS}
@@ -100,21 +102,9 @@ frontend-test:
       --testResultsProcessor=jest-junit \
       --outputFile=ci-reports/frontend-junit.xml \
       "src/**/*.test.js"
-    - sed -i '1s/<testsuites/<testExecutions version="1"/' "${REPORTS_DIR}/frontend-junit.xml"
-    - sed -i 's/<\/testsuites>/<\/testExecutions>/g' "${REPORTS_DIR}/frontend-junit.xml"
-    - sed -i 's/<testsuite /<file path="/g' "${REPORTS_DIR}/frontend-junit.xml"
-    - sed -i 's/<\/testsuite>/<\/file>/g' "${REPORTS_DIR}/frontend-junit.xml"
-    - sed -i 's/<testcase /<testCase name="/g' "${REPORTS_DIR}/frontend-junit.xml"
-    - sed -i 's/<\/testcase>/<\/testCase>/g' "${REPORTS_DIR}/frontend-junit.xml"
-    - |
-      echo '<?xml version="1.0" encoding="UTF-8"?>
-      <testExecutions version="1">' > "${REPORTS_DIR}/frontend-junit.xml"
-
-      xsltproc "${FRONTEND_DIR}/sonar-transform.xslt" \
-      "${REPOS_DIR}/frontend-sonar.xml" \
-      >> "${REPORTS_DIR}/frontend-junit.xml"
-
-      echo '</testExecutions>' >> "${REPOS_DIR}/frontend-junit.xml"
+    - xsltproc "${FRONTEND_DIR}/sonar-transform.xslt" \
+      "${REPORTS_DIR}/raw-report.xml" \
+      > "${REPORTS_DIR}/frontend-junit.xml"
     - cp coverage/lcov.info "${REPORTS_DIR}/frontend-lcov.info"
   artifacts:
     paths:
