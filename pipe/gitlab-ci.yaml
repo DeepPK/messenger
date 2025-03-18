@@ -63,7 +63,7 @@ backend-test:
   artifacts:
     paths:
       - "${REPORTS_DIR}/*.xml"
-      - "target/classes/
+      - "target/classes/"
     reports:
       junit:
         - "${REPORTS_DIR}/TEST-*.xml"
