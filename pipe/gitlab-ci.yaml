@@ -22,14 +22,6 @@ variables:
   SONAR_PROJECT_KEY: "DeepPK_messenger_f896f465-8052-4d8a-bb95-1979ae24fdb5"
   SONAR_USER_HOME: "${PROJECT_ROOT}/.sonar"
   #GIT_DEPTH: "0"
-  
-  # Miniqube
-  #MINIKUBE_IP: "192.168.49.2"
-  REGISTRY: "host.docker.internal:5000"
-  DOCKER_HOST: tcp://docker-host:2375
-  DOCKER_TLS_CERTDIR: ""
-  KUBECONFIG: "/root/.kube/config"
-  DOCKER_DRIVER: overlay2
 
 
 cache:
@@ -174,45 +166,40 @@ deploy:
   image: docker:24.0
   tags:
     - dep
+  variables:
+    DOCKERHUB_REGISTRY: "docker.io"
+    DOCKERHUB_NAMESPACE: "deepk10"
+    DOCKER_HOST: tcp://docker-host:2375
+    DOCKER_TLS_CERTDIR: ""
+    KUBECONFIG: "/root/.kube/config"
+    DOCKER_DRIVER: overlay2
   services:
     - name: docker:dind
       alias: docker-host
       command: ["--tls=false", "--host=tcp://0.0.0.0:2375"]
   before_script:
     - apk add --no-cache curl kubectl
-    - mkdir -p /etc/docker
-    - |
-      echo '{"insecure-registries":["'${REGISTRY}'"]}' > /etc/docker/daemon.json
-      pkill -SIGHUP dockerd || true
-      sleep 3
-      
-      # Проброс портов (если требуется)
-      kubectl port-forward -n kube-system service/registry 5000:30500 >/dev/null 2>&1 &
-      sleep 5
-      
-      # Добавляем host.docker.internal для Linux
-      if ! grep -q "host.docker.internal" /etc/hosts; then
-      echo "`/sbin/ip route | awk '/default/ { print $3 }'` host.docker.internal" >> /etc/hosts
-      fi
+    - docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
   script:
-    - sleep 5
     - |
-      ping -c 3 host.docker.internal
-      curl -v http://${REGISTRY}/v2/_catalog || true
+      # Сборка и публикация образов
+      docker build -t $DOCKERHUB_NAMESPACE/messenger:1.0 -f Dockerfile.back .
+      docker push $DOCKERHUB_NAMESPACE/messenger:1.0
       
-      # Сборка образов
-      docker build -t ${REGISTRY}/messenger:1.0 -f Dockerfile.back .
-      docker build -t ${REGISTRY}/frontend:1.0 -f messenger-frontend/Dockerfile.front ./messenger-frontend
-      docker build -t ${REGISTRY}/bot:1.0 -f Telegram_bot/Dockerfile.bot ./Telegram_bot
+      docker build -t $DOCKERHUB_NAMESPACE/frontend:1.0 -f messenger-frontend/Dockerfile.front ./messenger-frontend
+      docker push $DOCKERHUB_NAMESPACE/frontend:1.0
       
-      # Публикация образов
-      docker push ${REGISTRY}/messenger:1.0
-      docker push ${REGISTRY}/frontend:1.0
-      docker push ${REGISTRY}/bot:1.0
+      docker build -t $DOCKERHUB_NAMESPACE/bot:1.0 -f Telegram_bot/Dockerfile.bot ./Telegram_bot
+      docker push $DOCKERHUB_NAMESPACE/bot:1.0
       
-      curl http://${REGISTRY}/v2/_catalog
+      # Настройка доступа Minikube к Docker Hub
+      kubectl create secret docker-registry dockerhub-secret \
+        --docker-server=$DOCKERHUB_REGISTRY \
+        --docker-username=$DOCKERHUB_USERNAME \
+        --docker-password=$DOCKERHUB_PASSWORD \
+        --dry-run=client -o yaml | kubectl apply -f -
       
-      # Применение манифестов
+      # Применение манифестов с Docker Hub образами
       kubectl apply -f cloud/cloud-terraform/minicube-manifest/
       
       # Проверка статуса
@@ -223,12 +210,5 @@ deploy:
       # Финальная проверка
       kubectl get all,ingress -n messenger
       echo "✅ Deployment successful!"
-      
-      # Дополнительные проверки
-      kubectl get pods -o wide -n messenger
-      kubectl get services -n messenger
+
   needs: ["backend-build", "frontend-build", "bot-build"]
-  dependencies:
-    - backend-build
-    - bot-build
-    - frontend-build
