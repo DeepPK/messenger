@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.khkhlv.messenger.controller.MessageController;
@@ -14,10 +15,11 @@ import ru.khkhlv.messenger.service.MessageService;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -33,69 +35,92 @@ class MessageControllerTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this); // Инициализация моков
+        MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(messageController).build();
     }
 
     @Test
-    void testSendMessage() throws Exception {
-        // Подготовка данных
+    void testSendMessage_Success() throws Exception {
         Message message = new Message();
         message.setSender("Alice");
         message.setRecipient("Bob");
-        message.setContent("Hello, Bob!");
+        message.setContent("Hello");
         message.setTimestamp(LocalDateTime.now());
 
-        // Мокирование сервиса
-        when(messageService.sendMessage("Alice", "Bob", "Hello, Bob!")).thenReturn(message);
+        when(messageService.sendMessage("Alice", "Bob", "Hello")).thenReturn(message);
 
-        // Вызов метода и проверка результата
         mockMvc.perform(post("/messages/send")
                         .param("sender", "Alice")
                         .param("recipient", "Bob")
-                        .param("content", "Hello, Bob!")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .param("content", "Hello"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.sender").value("Alice"))
-                .andExpect(jsonPath("$.recipient").value("Bob"))
-                .andExpect(jsonPath("$.content").value("Hello, Bob!"));
+                .andExpect(jsonPath("$.content").value("Hello"));
+    }
+
+    @Test
+    void testSendMessage_Failure() throws Exception {
+        when(messageService.sendMessage(any(), any(), any()))
+                .thenThrow(new RuntimeException("Database error"));
+
+        mockMvc.perform(post("/messages/send")
+                        .param("sender", "Alice")
+                        .param("recipient", "Bob")
+                        .param("content", "Hello"))
+                .andExpect(status().isInternalServerError());
     }
 
     @Test
     void testGetMessagesForUser() throws Exception {
-        // Подготовка данных
-        Message message1 = new Message();
-        message1.setSender("Alice");
-        message1.setRecipient("Bob");
-        message1.setContent("Hello, Bob!");
+        Message message = new Message();
+        message.setRecipient("Bob");
+        when(messageService.getMessagesForUser("Bob")).thenReturn(Collections.singletonList(message));
 
-        Message message2 = new Message();
-        message2.setSender("Charlie");
-        message2.setRecipient("Bob");
-        message2.setContent("Hi, Bob!");
-
-        List<Message> messages = Arrays.asList(message1, message2);
-
-        // Мокирование сервиса
-        when(messageService.getMessagesForUser("Bob")).thenReturn(messages);
-
-        // Вызов метода и проверка результата
-        mockMvc.perform(get("/messages/Bob")
-                        .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/messages/Bob"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].sender").value("Alice"))
-                .andExpect(jsonPath("$[1].sender").value("Charlie"));
+                .andExpect(jsonPath("$[0].recipient").value("Bob"));
+    }
+
+    @Test
+    void testGetMessageById() throws Exception {
+        Message message = new Message();
+        message.setId(1L);
+        when(messageService.getMessageById(1L)).thenReturn(message);
+
+        mockMvc.perform(get("/messages/message/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1));
     }
 
     @Test
     void testDeleteMessage() throws Exception {
-        // Мокирование сервиса
         doNothing().when(messageService).deleteMessage(1L);
 
-        // Вызов метода и проверка результата
-        mockMvc.perform(delete("/messages/1")
-                        .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(delete("/messages/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Message with ID 1 has been deleted."));
     }
+
+    @Test
+    void testGetAllMessages() throws Exception {
+        Message message = new Message();
+        when(messageService.getAllMessages()).thenReturn(Collections.singletonList(message));
+
+        mockMvc.perform(get("/messages/all"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void testSearchMessages() throws Exception {
+        Message message = new Message();
+        message.setContent("test");
+        when(messageService.searchMessages("test")).thenReturn(Collections.singletonList(message));
+
+        mockMvc.perform(get("/messages/search")
+                        .param("keyword", "test"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].content").value("test"));
+    }
 }
+
