@@ -36,10 +36,10 @@
     "collectCoverage": true,
     "collectCoverageFrom": [
       "src/**/*.{js,jsx}",
-      "!src/**/setupProxy.js",
-      "!src/**/setupTests.js",
-      "!src/**/reportWebVitals.js",
-      "!src/components/**/index.js"
+      "!src/setupProxy.js",
+      "!src/setupTests.js",
+      "!src/reportWebVitals.js",
+      "!src/index.js"
     ],
     "coverageReporters": [
       "lcov",
