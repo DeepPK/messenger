@@ -36,6 +36,12 @@
     "coverageReporters": ["lcov", "cobertura", "text"],
     "coverageDirectory": "coverage",
     "testResultsProcessor": "jest-junit",
+    "modulePaths": ["src"],
+    "moduleFileExtensions": ["js", "jsx"],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "src/setupTests.js"
+    ],
     "reporters": [
       "default",
       ["jest-junit", {
