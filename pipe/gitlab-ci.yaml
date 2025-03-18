@@ -100,12 +100,12 @@ frontend-test:
       --testResultsProcessor=jest-junit \
       --outputFile=ci-reports/frontend-junit.xml \
       "src/**/*.test.js"
-    - sed -i 's/<testsuites /<testExecutions version="1"/' "${REPORTS_DIR}/frontend-junit.xml"
-    - sed -i 's/<\/testsuites>/<\/testExecutions>/' "${REPORTS_DIR}/frontend-junit.xml"
+    - sed -i '1s/<testsuites/<testExecutions version="1"/' "${REPORTS_DIR}/frontend-junit.xml"
+    - sed -i 's/<\/testsuites>/<\/testExecutions>/g' "${REPORTS_DIR}/frontend-junit.xml"
     - sed -i 's/<testsuite /<file path="/g' "${REPORTS_DIR}/frontend-junit.xml"
     - sed -i 's/<\/testsuite>/<\/file>/g' "${REPORTS_DIR}/frontend-junit.xml"
-    # Добавление обязательного атрибута file
     - sed -i 's/<testcase /<testCase name="/g' "${REPORTS_DIR}/frontend-junit.xml"
+    - sed -i 's/<\/testcase>/<\/testCase>/g' "${REPORTS_DIR}/frontend-junit.xml"
     - cp coverage/lcov.info "${REPORTS_DIR}/frontend-lcov.info"
   artifacts:
     paths:

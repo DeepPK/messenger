@@ -41,10 +41,12 @@
       ["jest-junit", {
         "outputDirectory": "ci-reports",
         "outputName": "frontend-junit.xml",
-        "addFileAttribute": true,
+        "ancestorSeparator": " > ",
         "suiteNameTemplate": "{filepath}",
         "classNameTemplate": "{classname}",
-        "titleTemplate": "{title}"
+        "titleTemplate": "{title}",
+        "addFileAttribute": true,
+        "includeConsoleOutput": true
       }]
     ],
     "testEnvironment": "jsdom",
