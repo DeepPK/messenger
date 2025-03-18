@@ -29,7 +29,7 @@ cache:
     - .m2/repository
     - target/classes/
     - messenger-frontend/node_modules
-    - target/site/jacoco-aggregate/
+    - target/site/jacoco/
 
 # ------------------------- BACKEND -------------------------
 # backend-build:
