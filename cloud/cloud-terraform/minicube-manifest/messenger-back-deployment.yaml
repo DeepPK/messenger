@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose -f docker-compose.yml convert
+    kompose.version: 1.35.0 (9532ceef3)
+  labels:
+    app: spring-app
+  name: messenger-back
+  namespace: messenger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-app
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose -f docker-compose.yml convert
+        kompose.version: 1.35.0 (9532ceef3)
+      labels:
+        app: spring-app
+    spec:
+      containers:
+        - env:
+            - name: SERVER_ADDRESS
+              value: 0.0.0.0
+            - name: spring.datasource.password
+              value: postgres
+            - name: spring.datasource.url
+              value: jdbc:postgresql://messenger-db:5433/messenger_db
+            - name: spring.datasource.username
+              value: postgres
+            - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+              value: "prometheus,health,metrics,info"
+            - name: MANAGEMENT.ENDPOINTS.WEB.BASE-PATH
+              value: "/actuator"
+            - name: MANAGEMENT.METRICS.TAGS.APPLICATION
+              value: "my-spring-app"
+            - name: MANAGEMENT.METRICS.EXPORT.PROMETHEUS.ENABLED
+              value: "true"
+            - name: MANAGEMENT.METRICS.DISTRIBUTION.PERCENTILES-HISTOGRAM.HTTP.SERVER.REQUESTS
+              value: "true"
+            - name: MANAGEMENT.ENDPOINTS.WEB.CORS.ALLOWED-ORIGINS
+              value: "*"
+          image: deepk10/messenger:1.0
+          name: backend
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 200m
+      restartPolicy: Always
