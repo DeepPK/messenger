@@ -1,23 +1,203 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="6" failures="0" errors="0" time="8.006">
-  <testsuite name="MessageSearch" errors="0" failures="0" skipped="0" timestamp="2025-03-18T01:44:23" time="5.126" tests="1">
-    <testcase classname="MessageSearch triggers search on input" name="MessageSearch triggers search on input" time="0.079">
+<testsuites name="jest tests" tests="11" failures="11" errors="0" time="4.661">
+  <testsuite name="undefined" errors="0" failures="2" skipped="0" timestamp="2025-03-18T02:08:39" time="2.125" tests="2">
+    <testcase classname=" clears search when empty input" name=" clears search when empty input" time="0.009">
+      <failure>ReferenceError: render is not defined
+    at Object.render (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\src\components\MessageSearch\MessageSearch.test.js:3:3)
+    at Promise.then.completed (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\utils.js:231:10)
+    at _callCircusTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:252:3)
+    at _runTestsForDescribeBlock (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:126:9)
+    at run (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:71:3)
+    at runAndTransformResultsToJestFormat (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+    at jestAdapter (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+    at runTestInternal (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\runTest.js:367:16)
+    at runTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\runTest.js:444:34)
+    at Object.worker (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
+    </testcase>
+    <testcase classname=" handles special characters in search" name=" handles special characters in search" time="0">
+      <failure>ReferenceError: render is not defined
+    at Object.render (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\src\components\MessageSearch\MessageSearch.test.js:15:3)
+    at Promise.then.completed (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\utils.js:231:10)
+    at _callCircusTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:252:3)
+    at _runTestsForDescribeBlock (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:126:9)
+    at run (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:71:3)
+    at runAndTransformResultsToJestFormat (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+    at jestAdapter (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+    at runTestInternal (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\runTest.js:367:16)
+    at runTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\runTest.js:444:34)
+    at Object.worker (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
     </testcase>
   </testsuite>
-  <testsuite name="App" errors="0" failures="0" skipped="0" timestamp="2025-03-18T01:44:23" time="5.129" tests="1">
-    <testcase classname="App renders without crashing" name="App renders without crashing" time="0.06">
+  <testsuite name="undefined" errors="0" failures="2" skipped="0" timestamp="2025-03-18T02:08:39" time="2.13" tests="2">
+    <testcase classname=" calls onDelete when delete button is clicked" name=" calls onDelete when delete button is clicked" time="0.013">
+      <failure>ReferenceError: render is not defined
+    at Object.render (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\src\components\MessageList\MessageList.test.js:3:3)
+    at Promise.then.completed (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\utils.js:231:10)
+    at _callCircusTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:252:3)
+    at _runTestsForDescribeBlock (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:126:9)
+    at run (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:71:3)
+    at runAndTransformResultsToJestFormat (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+    at jestAdapter (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+    at runTestInternal (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\runTest.js:367:16)
+    at runTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\runTest.js:444:34)
+    at Object.worker (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
+    </testcase>
+    <testcase classname=" displays timestamp correctly" name=" displays timestamp correctly" time="0.001">
+      <failure>ReferenceError: render is not defined
+    at Object.render (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\src\components\MessageList\MessageList.test.js:10:3)
+    at Promise.then.completed (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\utils.js:231:10)
+    at _callCircusTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:252:3)
+    at _runTestsForDescribeBlock (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:126:9)
+    at run (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:71:3)
+    at runAndTransformResultsToJestFormat (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+    at jestAdapter (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+    at runTestInternal (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\runTest.js:367:16)
+    at runTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\runTest.js:444:34)
+    at Object.worker (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
     </testcase>
   </testsuite>
-  <testsuite name="MessageForm" errors="0" failures="0" skipped="0" timestamp="2025-03-18T01:44:23" time="5.167" tests="2">
-    <testcase classname="MessageForm submits valid form data" name="MessageForm submits valid form data" time="0.103">
+  <testsuite name="undefined" errors="0" failures="2" skipped="0" timestamp="2025-03-18T02:08:39" time="2.131" tests="2">
+    <testcase classname=" resets form after successful submission" name=" resets form after successful submission" time="0.009">
+      <failure>ReferenceError: render is not defined
+    at Object.render (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\src\components\MessageForm\MessageForm.test.js:3:3)
+    at Promise.then.completed (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\utils.js:231:10)
+    at _callCircusTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:252:3)
+    at _runTestsForDescribeBlock (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:126:9)
+    at run (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:71:3)
+    at runAndTransformResultsToJestFormat (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+    at jestAdapter (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+    at runTestInternal (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\runTest.js:367:16)
+    at runTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\runTest.js:444:34)
+    at Object.worker (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
     </testcase>
-    <testcase classname="MessageForm shows error when fields are empty" name="MessageForm shows error when fields are empty" time="0.015">
+    <testcase classname=" shows error message on failed submission" name=" shows error message on failed submission" time="0.001">
+      <failure>ReferenceError: render is not defined
+    at Object.render (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\src\components\MessageForm\MessageForm.test.js:20:3)
+    at Promise.then.completed (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\utils.js:231:10)
+    at _callCircusTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:252:3)
+    at _runTestsForDescribeBlock (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:126:9)
+    at run (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:71:3)
+    at runAndTransformResultsToJestFormat (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+    at jestAdapter (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+    at runTestInternal (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\runTest.js:367:16)
+    at runTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\runTest.js:444:34)
+    at Object.worker (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
     </testcase>
   </testsuite>
-  <testsuite name="MessageList" errors="0" failures="0" skipped="0" timestamp="2025-03-18T01:44:23" time="5.182" tests="2">
-    <testcase classname="MessageList renders messages correctly" name="MessageList renders messages correctly" time="0.131">
+  <testsuite name="App" errors="0" failures="5" skipped="0" timestamp="2025-03-18T02:08:39" time="3.266" tests="5">
+    <testcase classname="App fetches and displays messages on mount" name="App fetches and displays messages on mount" time="0.005">
+      <failure>TypeError: _axios.default.get.mockResolvedValue is not a function
+    at Object.mockResolvedValue (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\src\App.test.js:11:13)
+    at Promise.then.completed (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\utils.js:231:10)
+    at _callCircusHook (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:281:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:246:5)
+    at _runTestsForDescribeBlock (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:126:9)
+    at _runTestsForDescribeBlock (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:121:9)
+    at run (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:71:3)
+    at runAndTransformResultsToJestFormat (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+    at jestAdapter (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+    at runTestInternal (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\runTest.js:367:16)
+    at runTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\runTest.js:444:34)
+    at Object.worker (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
     </testcase>
-    <testcase classname="MessageList shows empty state" name="MessageList shows empty state" time="0.002">
+    <testcase classname="App handles message sending" name="App handles message sending" time="0">
+      <failure>TypeError: _axios.default.get.mockResolvedValue is not a function
+    at Object.mockResolvedValue (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\src\App.test.js:11:13)
+    at Promise.then.completed (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\utils.js:231:10)
+    at _callCircusHook (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:281:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:246:5)
+    at _runTestsForDescribeBlock (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:126:9)
+    at _runTestsForDescribeBlock (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:121:9)
+    at run (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:71:3)
+    at runAndTransformResultsToJestFormat (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+    at jestAdapter (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+    at runTestInternal (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\runTest.js:367:16)
+    at runTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\runTest.js:444:34)
+    at Object.worker (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
+    </testcase>
+    <testcase classname="App handles message deletion" name="App handles message deletion" time="0.001">
+      <failure>TypeError: _axios.default.get.mockResolvedValue is not a function
+    at Object.mockResolvedValue (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\src\App.test.js:11:13)
+    at Promise.then.completed (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\utils.js:231:10)
+    at _callCircusHook (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:281:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:246:5)
+    at _runTestsForDescribeBlock (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:126:9)
+    at _runTestsForDescribeBlock (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:121:9)
+    at run (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:71:3)
+    at runAndTransformResultsToJestFormat (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+    at jestAdapter (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+    at runTestInternal (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\runTest.js:367:16)
+    at runTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\runTest.js:444:34)
+    at Object.worker (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
+    </testcase>
+    <testcase classname="App handles search functionality" name="App handles search functionality" time="0">
+      <failure>TypeError: _axios.default.get.mockResolvedValue is not a function
+    at Object.mockResolvedValue (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\src\App.test.js:11:13)
+    at Promise.then.completed (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\utils.js:231:10)
+    at _callCircusHook (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:281:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:246:5)
+    at _runTestsForDescribeBlock (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:126:9)
+    at _runTestsForDescribeBlock (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:121:9)
+    at run (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:71:3)
+    at runAndTransformResultsToJestFormat (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+    at jestAdapter (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+    at runTestInternal (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\runTest.js:367:16)
+    at runTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\runTest.js:444:34)
+    at Object.worker (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
+    </testcase>
+    <testcase classname="App handles errors gracefully" name="App handles errors gracefully" time="0.001">
+      <failure>TypeError: _axios.default.get.mockResolvedValue is not a function
+    at Object.mockResolvedValue (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\src\App.test.js:11:13)
+    at Promise.then.completed (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\utils.js:231:10)
+    at _callCircusHook (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:281:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:246:5)
+    at _runTestsForDescribeBlock (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:126:9)
+    at _runTestsForDescribeBlock (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:121:9)
+    at run (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\run.js:71:3)
+    at runAndTransformResultsToJestFormat (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+    at jestAdapter (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+    at runTestInternal (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\runTest.js:367:16)
+    at runTest (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\runTest.js:444:34)
+    at Object.worker (C:\Users\Павел\IdeaProjects\messenger\messenger-frontend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
     </testcase>
   </testsuite>
 </testsuites>
