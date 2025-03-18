@@ -106,6 +106,15 @@ frontend-test:
     - sed -i 's/<\/testsuite>/<\/file>/g' "${REPORTS_DIR}/frontend-junit.xml"
     - sed -i 's/<testcase /<testCase name="/g' "${REPORTS_DIR}/frontend-junit.xml"
     - sed -i 's/<\/testcase>/<\/testCase>/g' "${REPORTS_DIR}/frontend-junit.xml"
+    - |
+      echo '<?xml version="1.0" encoding="UTF-8"?>
+      <testExecutions version="1">' > "${REPORTS_DIR}/frontend-junit.xml"
+
+      xsltproc "${FRONTEND_DIR}/sonar-transform.xslt" \
+      "${REPOS_DIR}/frontend-sonar.xml" \
+      >> "${REPORTS_DIR}/frontend-junit.xml"
+
+      echo '</testExecutions>' >> "${REPOS_DIR}/frontend-junit.xml"
     - cp coverage/lcov.info "${REPORTS_DIR}/frontend-lcov.info"
   artifacts:
     paths:
@@ -121,10 +130,13 @@ sonar-check:
     - messenger
   image: sonarsource/sonar-scanner-cli:5.0.1
   variables:
+    SONAR_USER_HOME: "/tmp/.sonar"
     SONAR_SCANNER_OPTS: "-Xmx512m"
   script:
     - echo "Проверка существования отчетов:"
+    - apk add --no-cache libxslt
     - sonar-scanner
+      -Dsonar.nodejs.executable=$(which node)
       -Dsonar.projectKey=$SONAR_PROJECT_KEY
       -Dsonar.host.url=$SONAR_HOST_URL
       -Dsonar.login=$SONAR_TOKEN
