@@ -124,6 +124,21 @@ frontend-test:
    reports:
      junit: "${REPORTS_DIR}/frontend-junit.xml"
 
+
+bot-build:
+  stage: build
+  image: python:3.10-alpine
+  tags:
+    - messenger
+  variables:
+    BOT_DIR: "${PROJECT_ROOT}/Telegram_bot"
+  script:
+    - cd "${BOT_DIR}"
+    - pip install -r requirements.txt
+  artifacts:
+    paths:
+      - Telegram_bot/
+    expire_in: 1 day
 # ------------------------- SONARQUBE ANALYSIS -------------------------
 sonar-check:
  stage: sonar-check
@@ -212,4 +227,8 @@ deploy:
       # Дополнительные проверки
       kubectl get pods -o wide -n messenger
       kubectl get services -n messenger
-  needs: ["sonar-check", "backend-build", "frontend-build"]
+  needs: ["sonar-check", "backend-build", "frontend-build", "bot-build"]
+  dependencies:
+    - backend-build
+    - bot-build
+    - frontend-build
