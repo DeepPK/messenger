@@ -22,6 +22,12 @@ variables:
   SONAR_PROJECT_KEY: "DeepPK_messenger_f896f465-8052-4d8a-bb95-1979ae24fdb5"
   SONAR_USER_HOME: "${PROJECT_ROOT}/.sonar"
   GIT_DEPTH: "0"
+  
+  # Miniqube
+  DOCKER_HOST: tcp://docker:2375  # Подключение без TLS
+  DOCKER_TLS_CERTDIR: ""
+  MINIKUBE_IP: "192.168.49.2"  # Заменить на реальный IP minikube
+  KUBECONFIG: "/root/.kube/config"
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
@@ -143,59 +149,66 @@ cache:
 #       -Dsonar.qualitygate.wait=true
 #   needs: [ "backend-test", "frontend-test" ]
 
-deploy:
-  stage: deploy
+stage: deploy
   image: docker:24.0
   tags:
     - messenger
   services:
     - name: docker:dind
-      alias: docker-host
-  variables:
-    DOCKER_HOST: tcp://docker-host:2375  # Подключение без TLS
-    DOCKER_TLS_CERTDIR: ""
-    MINIKUBE_IP: "192.168.49.2"  # Заменить на реальный IP minikube
-    KUBECONFIG: "/root/.kube/config"
+      alias: docker
   before_script:
-    - apk add --no-cache curl kubectl  # Установка зависимостей
-    - mkdir -p /root/.docker /root/.kube
+    - apk add --no-cache curl kubectl
+    - mkdir -p /root/.docker /root/.kube /root/.minikube/profiles/minikube
+
+    # Загрузка сертификатов
+    - echo "$CA_CRT" | base64 -d > /root/.minikube/ca.crt
+    - echo "$CLIENT_CRT" | base64 -d > /root/.minikube/profiles/minikube/client.crt
+    - echo "$CLIENT_KEY" | base64 -d > /root/.minikube/profiles/minikube/client.key
+    - chmod 600 /root/.minikube/profiles/minikube/*
+
+    # Настройка kubeconfig
+    - kubectl config set-cluster minikube \
+        --server=https://${MINIKUBE_IP}:8443 \
+        --certificate-authority=/root/.minikube/ca.crt
+    - kubectl config set-credentials minikube \
+        --client-certificate=/root/.minikube/profiles/minikube/client.crt \
+        --client-key=/root/.minikube/profiles/minikube/client.key
+    - kubectl config set-context minikube \
+        --cluster=minikube \
+        --user=minikube \
+        --namespace=messenger
+    - kubectl config use-context minikube
+
+    # Настройка Docker
     - echo "{\"insecure-registries\":[\"${MINIKUBE_IP}:5000\"]}" > /root/.docker/daemon.json
-    - echo "$KUBECONFIG_CONTENT" > $KUBECONFIG
-    - chmod 600 $KUBECONFIG
-    - kubectl config view --raw
-    - kubectl config use-context minikube  # Активация контекста
 
   script:
     - |
-      docker info || true
+      # Проверка окружения
+      docker info
       kubectl cluster-info
 
       # Сборка образов
-      docker build -t ${MINIKUBE_IP}:5000/messenger:1.0 -f Dockerfile.back . || exit 1
-      docker build -t ${MINIKUBE_IP}:5000/frontend:1.0 -f messenger-frontend/Dockerfile.front ./messenger-frontend || exit 1
-      docker build -t ${MINIKUBE_IP}:5000/telegram-bot:1.0 -f Telegram_bot/Dockerfile.bot ./Telegram_bot || exit 1
+      docker build -t ${MINIKUBE_IP}:5000/messenger:1.0 -f Dockerfile.back .
+      docker build -t ${MINIKUBE_IP}:5000/frontend:1.0 -f messenger-frontend/Dockerfile.front ./messenger-frontend
+      docker build -t ${MINIKUBE_IP}:5000/bot:1.0 -f Telegram_bot/Dockerfile.bot ./Telegram_bot
 
       # Публикация образов
-      docker push ${MINIKUBE_IP}:5000/messenger:1.0 || exit 1
-      docker push ${MINIKUBE_IP}:5000/frontend:1.0 || exit 1
-      docker push ${MINIKUBE_IP}:5000/telegram-bot:1.0 || exit 1
+      docker push ${MINIKUBE_IP}:5000/messenger:1.0
+      docker push ${MINIKUBE_IP}:5000/frontend:1.0
+      docker push ${MINIKUBE_IP}:5000/bot:1.0
 
       # Применение манифестов
-      kubectl apply -f cloud/cloud-terraform/minicube-manifest/ --namespace=messenger || exit 1
-
-      # Ожидание готовности
-      sleep 30  # Даем время для инициализации
+      kubectl apply -f cloud/cloud-terraform/minicube-manifest/
 
       # Проверка статуса
-      kubectl rollout status deployment/messenger-back --namespace=messenger --timeout=180s
-      kubectl rollout status deployment/app --namespace=messenger --timeout=180s
-      kubectl rollout status deployment/bot --namespace=messenger --timeout=180s
+      kubectl rollout status deployment/messenger-back --timeout=180s
+      kubectl rollout status deployment/frontend --timeout=180s
+      kubectl rollout status deployment/bot --timeout=180s
       
-      # Финал проверки
-      kubectl get all -n messenger
-      kubectl get ingress -n messenger
-      echo "Deployment successful!"
-  timeout: 20 minutes
+      # Финальная проверка
+      kubectl get all,ingress -n messenger
+      echo "✅ Deployment successful!"
   # only:
   #   - main
   #needs: ["sonar-check"]
