@@ -27,6 +27,6 @@ spec:
               value: http://10.102.70.93:8080/messages
             - name: TOKEN
               value: 7537054107:AAHwkBopAiYR0fleIogFq57wC2_Se5CxX5s
-          image: deepk10/telegram-bot:1.0
+          image: 192.168.49.2:5000/telegram-bot:1.0
           name: bot
       restartPolicy: Always
