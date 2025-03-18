@@ -11,7 +11,7 @@ variables:
   REPORTS_DIR: "${PROJECT_ROOT}/messenger-frontend/ci-reports"
   
   # Maven settings
-  MAVEN_OPTS: "-Dmaven.repo.local=${PROJECT_ROOT}/.m2/repository"
+  #MAVEN_OPTS: "-Dmaven.repo.local=${PROJECT_ROOT}/.m2/repository"
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
   
   # Node settings
@@ -21,12 +21,12 @@ variables:
   # SonarQube
   SONAR_PROJECT_KEY: "DeepPK_messenger_f896f465-8052-4d8a-bb95-1979ae24fdb5"
   SONAR_USER_HOME: "${PROJECT_ROOT}/.sonar"
-  GIT_DEPTH: "0"
+  #GIT_DEPTH: "0"
   
   # Miniqube
-  DOCKER_HOST: tcp://docker:2375  # Подключение без TLS
-  DOCKER_TLS_CERTDIR: ""
-  MINIKUBE_IP: "192.168.49.2"  # Заменить на реальный IP minikube
+  #DOCKER_HOST: tcp://docker:2375
+  #DOCKER_TLS_CERTDIR: ""
+  MINIKUBE_IP: "192.168.49.2"
   KUBECONFIG: "/root/.kube/config"
 
 cache:
@@ -148,8 +148,8 @@ cache:
 #       -Dsonar.testExecutionReportPaths=messenger-frontend/ci-reports/frontend-junit.xml
 #       -Dsonar.qualitygate.wait=true
 #   needs: [ "backend-test", "frontend-test" ]
-
-stage: deploy
+deploy:
+  stage: deploy
   image: docker:24.0
   tags:
     - messenger
@@ -181,7 +181,6 @@ stage: deploy
 
     # Настройка Docker
     - echo "{\"insecure-registries\":[\"${MINIKUBE_IP}:5000\"]}" > /root/.docker/daemon.json
-
   script:
     - |
       # Проверка окружения
