@@ -6,8 +6,8 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY Telegram_Bot.py .
+COPY Bot.py .
 
 ENV TOKEN="7537054107:AAHwkBopAiYR0fleIogFq57wC2_Se5CxX5s"
 
-CMD ["python", "Telegram_Bot.py"]
+CMD ["python", "Bot.py"]

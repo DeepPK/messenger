@@ -134,11 +134,13 @@ bot-build:
     BOT_DIR: "${PROJECT_ROOT}/Telegram_bot"
   script:
     - cd "${BOT_DIR}"
+    - ls -la "${BOT_DIR}"
     - pip install -r requirements.txt
   artifacts:
     paths:
       - Telegram_bot/
     expire_in: 1 day
+
 # ------------------------- SONARQUBE ANALYSIS -------------------------
 sonar-check:
  stage: sonar-check
