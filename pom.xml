@@ -109,7 +109,7 @@
                             <goal>report</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.reporting.outputDirectory}/jacoco</outputDirectory>
+<!--                            <outputDirectory>${project.reporting.outputDirectory}/jacoco</outputDirectory>-->
                             <formats>XML</formats>
                         </configuration>
                     </execution>
