@@ -40,7 +40,7 @@
       "default",
       ["jest-junit", {
         "outputDirectory": "ci-reports",
-        "outputName": "frontend-junit.xml",
+        "outputName": "raw-report.xml",
         "ancestorSeparator": " > ",
         "suiteNameTemplate": "{filepath}",
         "classNameTemplate": "{classname}",

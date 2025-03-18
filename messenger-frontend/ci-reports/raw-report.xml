@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="6" failures="0" errors="0" time="2.964">
+  <testsuite name="src\App.test.js" errors="0" failures="0" skipped="0" timestamp="2025-03-18T00:51:25" time="1.902" tests="1">
+    <testcase classname="App" name="renders without crashing" time="0.047">
+    </testcase>
+  </testsuite>
+  <testsuite name="src\components\MessageSearch\MessageSearch.test.js" errors="0" failures="0" skipped="0" timestamp="2025-03-18T00:51:25" time="1.887" tests="1">
+    <testcase classname="MessageSearch" name="triggers search on input" time="0.069">
+    </testcase>
+  </testsuite>
+  <testsuite name="src\components\MessageList\MessageList.test.js" errors="0" failures="0" skipped="0" timestamp="2025-03-18T00:51:25" time="1.916" tests="2">
+    <testcase classname="MessageList" name="renders messages correctly" time="0.076">
+    </testcase>
+    <testcase classname="MessageList" name="shows empty state" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="src\components\MessageForm\MessageForm.test.js" errors="0" failures="0" skipped="0" timestamp="2025-03-18T00:51:25" time="1.955" tests="2">
+    <testcase classname="MessageForm" name="submits valid form data" time="0.095">
+    </testcase>
+    <testcase classname="MessageForm" name="shows error when fields are empty" time="0.014">
+    </testcase>
+  </testsuite>
+</testsuites>
