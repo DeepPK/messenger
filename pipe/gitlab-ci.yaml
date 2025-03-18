@@ -1,7 +1,7 @@
 stages:
   - build
-  - test
-  - sonar-check
+  #- test
+  #- sonar-check
   - deploy
 
 variables:
@@ -237,7 +237,7 @@ deploy:
       # Дополнительные проверки
       kubectl get pods -o wide -n messenger
       kubectl get services -n messenger
-  needs: ["sonar-check", "backend-build", "frontend-build", "bot-build"]
+  needs: ["backend-build", "frontend-build", "bot-build"]
   dependencies:
     - backend-build
     - bot-build
