@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { Form, Button } from 'react-bootstrap';
 
 const MessageSearch = ({ onSearch }) => {
@@ -22,6 +23,10 @@ const MessageSearch = ({ onSearch }) => {
             </Form.Group>
         </Form>
     );
+};
+
+MessageSearch.propTypes = {
+    onSearch: PropTypes.func.isRequired
 };
 
 export default MessageSearch;

@@ -6,12 +6,15 @@ import ru.khkhlv.messenger.model.Message;
 import ru.khkhlv.messenger.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/messages")
 public class MessageController {
+    private static final Logger log = LoggerFactory.getLogger(MessageController.class);
     @Autowired
     private MessageService messageService;
     @PostMapping("/send")
@@ -38,7 +41,7 @@ public class MessageController {
 
     @DeleteMapping("/{id}")
     public String deleteMessage(@PathVariable("id") Long id) {
-        System.out.println("Deleting message with ID: " + id);
+        log.info("Deleting message with ID: {}", id);  // Исправленная строка
         messageService.deleteMessage(id);
         return "Message with ID " + id + " has been deleted.";
     }
