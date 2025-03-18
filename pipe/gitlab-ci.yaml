@@ -160,7 +160,7 @@ deploy:
     - apk add --no-cache curl kubectl  # Установка зависимостей
     - mkdir -p /root/.docker /root/.kube
     - echo "{\"insecure-registries\":[\"${MINIKUBE_IP}:5000\"]}" > /root/.docker/daemon.json
-    - echo "$KUBECONFIG_CONTENT" | base64 -d > $KUBECONFIG
+    - echo "$KUBECONFIG_CONTENT" > $KUBECONFIG
     - chmod 600 $KUBECONFIG
     - kubectl config view --raw
     - kubectl config use-context minikube  # Активация контекста
