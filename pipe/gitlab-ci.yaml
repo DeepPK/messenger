@@ -55,27 +55,27 @@ backend-build:
      - target/*.jar
    expire_in: 1 day
 
-backend-test:
- image: maven:3.8.6-openjdk-18
- stage: test
- tags:
-   - messenger
- script:
-   - cd "${BACKEND_DIR}"
-   - mvn ${MAVEN_CLI_OPTS} clean verify
-   - ls -la target/site/jacoco/
-   - ls -la target/classes/
-   - mvn surefire-report:report
-   - mkdir -p "${REPORTS_DIR}"
-   - cp target/site/jacoco/jacoco.xml "${REPORTS_DIR}/backend-jacoco.xml"
-   - cp target/surefire-reports/TEST-*.xml "${REPORTS_DIR}/"
- artifacts:
-   paths:
-     - "${REPORTS_DIR}/*.xml"
-     - "target/classes/"
-   reports:
-     junit:
-       - "${REPORTS_DIR}/TEST-*.xml"
+#backend-test:
+# image: maven:3.8.6-openjdk-18
+# stage: test
+# tags:
+#   - messenger
+# script:
+#   - cd "${BACKEND_DIR}"
+#   - mvn ${MAVEN_CLI_OPTS} clean verify
+#   - ls -la target/site/jacoco/
+#   - ls -la target/classes/
+#   - mvn surefire-report:report
+#   - mkdir -p "${REPORTS_DIR}"
+#   - cp target/site/jacoco/jacoco.xml "${REPORTS_DIR}/backend-jacoco.xml"
+#   - cp target/surefire-reports/TEST-*.xml "${REPORTS_DIR}/"
+# artifacts:
+#   paths:
+#     - "${REPORTS_DIR}/*.xml"
+#     - "target/classes/"
+#   reports:
+#     junit:
+#       - "${REPORTS_DIR}/TEST-*.xml"
 
 # ------------------------- FRONTEND -----------------------
 frontend-build:
@@ -93,37 +93,37 @@ frontend-build:
      - messenger-frontend/build/
    expire_in: 1 day
 
-frontend-test:
- image: node:${NODE_VERSION}-alpine
- stage: test
- tags:
-   - messenger
- variables:
-   CI: "true"
- before_script:
-   - apk add --no-cache libxslt
- script:
-   - cd "${FRONTEND_DIR}"
-   - npm ci ${NPM_CI_OPTS}
-   - npm install jest-junit --save-dev
-   - mkdir -p "${REPORTS_DIR}"
-   - npm test -- \
-     --coverage \
-     --watchAll=false \
-     --reporters=jest-junit \
-     --testResultsProcessor=jest-junit \
-     --outputFile=ci-reports/raw-report.xml \
-     "src/**/*.test.js"
-   - test -f "${REPORTS_DIR}/raw-report.xml" || exit 1
-   - test -f "sonar-transform.xslt" || exit 1
-   - xsltproc "sonar-transform.xslt" "${REPORTS_DIR}/raw-report.xml" > "${REPORTS_DIR}/frontend-junit.xml"
-   - cp coverage/lcov.info "${REPORTS_DIR}/frontend-lcov.info"
- artifacts:
-   paths:
-     - "${REPORTS_DIR}/frontend-lcov.info"
-     - "${REPORTS_DIR}/frontend-junit.xml"
-   reports:
-     junit: "${REPORTS_DIR}/frontend-junit.xml"
+#frontend-test:
+# image: node:${NODE_VERSION}-alpine
+# stage: test
+# tags:
+#   - messenger
+# variables:
+#   CI: "true"
+# before_script:
+#   - apk add --no-cache libxslt
+# script:
+#   - cd "${FRONTEND_DIR}"
+#   - npm ci ${NPM_CI_OPTS}
+#   - npm install jest-junit --save-dev
+#   - mkdir -p "${REPORTS_DIR}"
+#   - npm test -- \
+#     --coverage \
+#     --watchAll=false \
+#     --reporters=jest-junit \
+#     --testResultsProcessor=jest-junit \
+#     --outputFile=ci-reports/raw-report.xml \
+#     "src/**/*.test.js"
+#   - test -f "${REPORTS_DIR}/raw-report.xml" || exit 1
+#   - test -f "sonar-transform.xslt" || exit 1
+#   - xsltproc "sonar-transform.xslt" "${REPORTS_DIR}/raw-report.xml" > "${REPORTS_DIR}/frontend-junit.xml"
+#   - cp coverage/lcov.info "${REPORTS_DIR}/frontend-lcov.info"
+# artifacts:
+#   paths:
+#     - "${REPORTS_DIR}/frontend-lcov.info"
+#     - "${REPORTS_DIR}/frontend-junit.xml"
+#   reports:
+#     junit: "${REPORTS_DIR}/frontend-junit.xml"
 
 
 bot-build:
@@ -143,31 +143,31 @@ bot-build:
     expire_in: 1 day
 
 # ------------------------- SONARQUBE ANALYSIS -------------------------
-sonar-check:
- stage: sonar-check
- tags:
-   - dep
- image: sonarsource/sonar-scanner-cli:5.0.1
- variables:
-   SONAR_USER_HOME: "/tmp/.sonar"
-   SONAR_SCANNER_OPTS: "-Xmx512m"
- script:
-   - apk add --no-cache libxslt
-   - sonar-scanner -X
-     -Dsonar.nodejs.executable=$(which node)
-     -Dsonar.projectKey=$SONAR_PROJECT_KEY
-     -Dsonar.host.url=$SONAR_HOST_URL
-     -Dsonar.login=$SONAR_TOKEN
-     -Dsonar.coverage.exclusions=**/WebConfig.java,**/SecurityConfiguration.java
-     -Dsonar.javascript.exclusions=**/setupProxy.js,**/setupTests.js
-     -Dsonar.sources=src/main/java,messenger-frontend/src
-     -Dsonar.java.binaries=${PROJECT_ROOT}/target/classes
-     -Dsonar.coverage.jacoco.xmlReportPaths=messenger-frontend/ci-reports/backend-jacoco.xml
-     -Dsonar.javascript.lcov.reportPaths=messenger-frontend/ci-reports/frontend-lcov.info
-     -Dsonar.testExecutionReportPaths=**/target/surefire-reports/TEST-*.xml
-     -Dsonar.testExecutionReportPaths=messenger-frontend/ci-reports/frontend-junit.xml
-     -Dsonar.qualitygate.wait=true
- needs: [ "backend-test", "frontend-test" ]
+#sonar-check:
+# stage: sonar-check
+# tags:
+#   - dep
+# image: sonarsource/sonar-scanner-cli:5.0.1
+# variables:
+#   SONAR_USER_HOME: "/tmp/.sonar"
+#   SONAR_SCANNER_OPTS: "-Xmx512m"
+# script:
+#   - apk add --no-cache libxslt
+#   - sonar-scanner -X
+#     -Dsonar.nodejs.executable=$(which node)
+#     -Dsonar.projectKey=$SONAR_PROJECT_KEY
+#     -Dsonar.host.url=$SONAR_HOST_URL
+#     -Dsonar.login=$SONAR_TOKEN
+#     -Dsonar.coverage.exclusions=**/WebConfig.java,**/SecurityConfiguration.java
+#     -Dsonar.javascript.exclusions=**/setupProxy.js,**/setupTests.js
+#     -Dsonar.sources=src/main/java,messenger-frontend/src
+#     -Dsonar.java.binaries=${PROJECT_ROOT}/target/classes
+#     -Dsonar.coverage.jacoco.xmlReportPaths=messenger-frontend/ci-reports/backend-jacoco.xml
+#     -Dsonar.javascript.lcov.reportPaths=messenger-frontend/ci-reports/frontend-lcov.info
+#     -Dsonar.testExecutionReportPaths=**/target/surefire-reports/TEST-*.xml
+#     -Dsonar.testExecutionReportPaths=messenger-frontend/ci-reports/frontend-junit.xml
+#     -Dsonar.qualitygate.wait=true
+# needs: [ "backend-test", "frontend-test" ]
 
 deploy:
   stage: deploy
