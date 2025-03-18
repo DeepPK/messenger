@@ -9,6 +9,8 @@ metadata:
   name: bot
   namespace: messenger
 spec:
+  imagePullSecrets:
+    - name: dockerhub-secret
   replicas: 1
   selector:
     matchLabels:
@@ -27,6 +29,6 @@ spec:
               value: http://10.102.70.93:8080/messages
             - name: TOKEN
               value: 7537054107:AAHwkBopAiYR0fleIogFq57wC2_Se5CxX5s
-          image: 192.168.49.2:5000/telegram-bot:1.0
+          image: deepk10/telegram-bot:1.0
           name: bot
       restartPolicy: Always
