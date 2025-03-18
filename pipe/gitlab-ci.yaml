@@ -54,6 +54,7 @@ backend-test:
   script:
     - cd "${BACKEND_DIR}"
     - mvn ${MAVEN_CLI_OPTS} clean verify
+    - ls -la target/site/jacoco/
     - mvn surefire-report:report
     - mkdir -p "${REPORTS_DIR}"
     - cp target/site/jacoco/jacoco.xml "${REPORTS_DIR}/backend-jacoco.xml"
