@@ -181,13 +181,11 @@ deploy:
     - apk add --no-cache curl kubectl
     - mkdir -p /root/.kube /root/.minikube/profiles/minikube
     - |
-    # Копирование сертификатов
       echo "$CA_CRT" | base64 -d > /root/.minikube/ca.crt
       echo "$CLIENT_CRT" | base64 -d > /root/.minikube/profiles/minikube/client.crt
       echo "$CLIENT_KEY" | base64 -d > /root/.minikube/profiles/minikube/client.key
       chmod 600 /root/.minikube/profiles/minikube/*
 
-    # Настройка kubectl
       kubectl config set-cluster minikube \
         --server=https://${MINIKUBE_IP}:8443 \
         --certificate-authority=/root/.minikube/ca.crt \
@@ -204,7 +202,6 @@ deploy:
         --namespace=messenger
     
       kubectl config use-context minikube
-    # Проверка подключения
       kubectl cluster-info
       kubectl get nodes
       docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
