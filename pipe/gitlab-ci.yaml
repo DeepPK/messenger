@@ -167,7 +167,6 @@ deploy:
   tags:
     - dep
   variables:
-    MINIKUBE_IP: "host.docker.internal"
     DOCKERHUB_REGISTRY: "docker.io"
     DOCKERHUB_NAMESPACE: "deepk10"
     DOCKER_HOST: tcp://docker-host:2375
