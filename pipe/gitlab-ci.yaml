@@ -188,7 +188,7 @@ deploy:
     - kubectl cluster-info
   script:
     - echo "🔄 Сборка и загрузка образов"
-#    - docker buildx create --use
+#    - docker buildx create --used
 #    - docker build -t messenger:1.0 -f Dockerfile.back .
 #    - docker build -t frontend:1.0 -f messenger-frontend/Dockerfile.front ./messenger-frontend
 #    - docker build -t telegram-bot:1.0 -f Telegram_bot/Dockerfile.bot ./Telegram_bot
