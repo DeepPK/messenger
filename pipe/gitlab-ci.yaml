@@ -208,7 +208,7 @@ deploy:
         --namespace=messenger
     
       kubectl config use-context minikube
-    # Проверка подключения
+    # Проверка подключенияу
       kubectl cluster-info
       kubectl get nodes
       docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
