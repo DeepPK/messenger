@@ -180,7 +180,6 @@ deploy:
       command: ["--tls=false", "--host=tcp://0.0.0.0:2375"]
   before_script:
     - apk add --no-cache curl kubectl
-    - curl -k https://${MINIKUBE_IP}:8443/version
     - ping -c 3 ${MINIKUBE_IP}
     - nc -zv ${MINIKUBE_IP} 8443
     # Копирование сертификатов
