@@ -163,53 +163,28 @@ cache:
 
 deploy:
   stage: deploy
-  image: docker:24.0
+  image: alpine:3.18
   tags:
     - dep
   variables:
-    DOCKERHUB_REGISTRY: "docker.io"
-    DOCKERHUB_NAMESPACE: "deepk10"
-    DOCKER_HOST: tcp://docker-host:2375
-    DOCKER_TLS_CERTDIR: ""
+#    DOCKERHUB_REGISTRY: "docker.io"
+#    DOCKERHUB_NAMESPACE: "deepk10"
+#    DOCKER_HOST: tcp://docker-host:2375
+#    DOCKER_TLS_CERTDIR: ""
     KUBECONFIG: "/root/.kube/config"
-  services:
-    - name: docker:dind
-      alias: docker-host
-      command: ["--tls=false", "--host=tcp://0.0.0.0:2375"]
+    SSH_PORT: 22
+#  services:
+#    - name: docker:dind
+#      alias: docker-host
+#      command: ["--tls=false", "--host=tcp://0.0.0.0:2375"]
   before_script:
-    - apk add --no-cache curl kubectl
-    - mkdir -p /root/.kube /root/.minikube/profiles/minikube
-    - |
-      # ping -c 3 ${MINIKUBE_IP}
-      nc -zv ${MINIKUBE_IP} 8443 -w 5
-      
-      # Копирование сертификатов
-      echo "$CA_CRT" | base64 -d > /root/.minikube/ca.crt
-      echo "$CLIENT_CRT" | base64 -d > /root/.minikube/profiles/minikube/client.crt
-      echo "$CLIENT_KEY" | base64 -d > /root/.minikube/profiles/minikube/client.key
-      chmod 600 /root/.minikube/profiles/minikube/*
-
-      # Настройка kubectl;lk
-      kubectl config set-cluster minikube \
-        --server=https://${MINIKUBE_IP}:8443 \
-        --certificate-authority=/root/.minikube/ca.crt \
-        --embed-certs=true
-        
-      kubectl config set-credentials minikube \
-        --client-certificate=/root/.minikube/profiles/minikube/client.crt \
-        --client-key=/root/.minikube/profiles/minikube/client.key \
-        --embed-certs=true
-        
-      kubectl config set-context minikube \
-        --cluster=minikube \
-        --user=minikube \
-        --namespace=messenger
-    
-      kubectl config use-context minikube
-      # Проверка подключенияуs
-      kubectl cluster-info
-      kubectl get nodes
-      docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
+    - apk add --no-cache openssh-client rsync docker-cli kubectl
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -p $SSH_PORT $SSH_HOST >> ~/.ssh/known_hosts
+    - docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
   script:
     - |
       # Сборка и публикация образов
@@ -221,32 +196,35 @@ deploy:
       
       docker build -t $DOCKERHUB_NAMESPACE/telegram-bot:1.0 -f Telegram_bot/Dockerfile.bot ./Telegram_bot
       docker push $DOCKERHUB_NAMESPACE/telegram-bot:1.0
+      ssh -p $SSH_PORT $SSH_USER@$SSH_HOST "
+        set -e
+        docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
       
       # Настройка доступа Minikube к Docker Hub
-      kubectl create secret docker-registry dockerhub-secret \
-        --docker-server=$DOCKERHUB_REGISTRY \
-        --docker-username=$DOCKERHUB_USERNAME \
-        --docker-password=$DOCKERHUB_PASSWORD \
-        --dry-run=client -o yaml | kubectl apply -f -
-      
-      # Применение манифестов с Docker Hub образами
-      kubectl apply -f cloud/cloud-terraform/minicube-manifest/
-      
-      kubectl wait --for=condition=available \
-        --timeout=300s \
-        deployment/messenger-back \
-        deployment/app \
-        deployment/bot \
-        -n messenger
-      
-      # Проверка статуса
-      kubectl rollout status deployment/messenger-back --timeout=180s
-      kubectl rollout status deployment/app --timeout=180s
-      kubectl rollout status deployment/bot --timeout=180s
-      
-      # Финальная проверка
-      kubectl get pods,svc,ing -n messenger
-      echo "✅ Deployment successful!"
+        kubectl create secret docker-registry dockerhub-secret \
+          --docker-server=$DOCKERHUB_REGISTRY \
+          --docker-username=$DOCKERHUB_USERNAME \
+          --docker-password=$DOCKERHUB_PASSWORD \
+          --dry-run=client -o yaml | kubectl apply -f -
+        
+        # Применение манифестов с Docker Hub образами
+        kubectl apply -f /home/deep/docker-compose --namespace=messenger
+        
+        kubectl wait --for=condition=available \
+          --timeout=300s \
+          deployment/messenger-back \
+          deployment/app \
+          deployment/bot \
+          -n messenger
+        
+        # Проверка статуса
+        kubectl rollout status deployment/messenger-back --namespace=messenger --timeout=180s
+        kubectl rollout status deployment/app --namespace=messenger --timeout=180s
+        kubectl rollout status deployment/bot --namespace=messenger --timeout=180s
+        
+        # Финальная проверка
+        kubectl get pods,svc,ing -n messenger
+        echo "✅ Deployment successful!"
   #needs: [ "backend-build", "frontend-build", "bot-build" ]
   # dependencies:
   #   - backend-build
