@@ -241,7 +241,7 @@ deploy:
       # Финальная проверка
       kubectl get pods,svc,ing -n messenger
       echo "✅ Deployment successful!"
-  needs: [ "backend-build", "frontend-build", "bot-build" ]
+  #needs: [ "backend-build", "frontend-build", "bot-build" ]
   # dependencies:
   #   - backend-build
   #   - frontend-build
