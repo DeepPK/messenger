@@ -167,7 +167,7 @@ deploy:
   tags:
     - dep
   variables:
-    MINIKUBE_IP: "192.168.49.2"
+    MINIKUBE_IP: "host.docker.internal"
     DOCKERHUB_REGISTRY: "docker.io"
     DOCKERHUB_NAMESPACE: "deepk10"
     DOCKER_HOST: tcp://docker-host:2375
@@ -181,6 +181,10 @@ deploy:
     - apk add --no-cache curl kubectl
     - mkdir -p /root/.kube /root/.minikube/profiles/minikube
     - |
+      echo "Проверка сетевой доступности:"
+      ping -c 3 ${MINIKUBE_IP} || echo "Ping test failed"
+      nc -zv ${MINIKUBE_IP} 8443 -w 5 || echo "Port check failed"
+      curl -k https://${MINIKUBE_IP}:8443/version || echo "API check failed"
     # Копирование сертификатов
       echo "$CA_CRT" | base64 -d > /root/.minikube/ca.crt
       echo "$CLIENT_CRT" | base64 -d > /root/.minikube/profiles/minikube/client.crt
@@ -192,12 +196,12 @@ deploy:
         --server=https://${MINIKUBE_IP}:8443 \
         --certificate-authority=/root/.minikube/ca.crt \
         --embed-certs=true
-
+        
       kubectl config set-credentials minikube \
         --client-certificate=/root/.minikube/profiles/minikube/client.crt \
         --client-key=/root/.minikube/profiles/minikube/client.key \
         --embed-certs=true
-    
+        
       kubectl config set-context minikube \
         --cluster=minikube \
         --user=minikube \
