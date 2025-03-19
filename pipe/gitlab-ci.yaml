@@ -180,7 +180,7 @@ deploy:
     - apk add --no-cache curl kubectl
     - mkdir -p /root/.kube /root/.minikube/profiles/minikube
     - |
-      ping -c ${MINIKUBE_IP} 3 
+      ping -c 3 ${MINIKUBE_IP}
       # nc -zv ${MINIKUBE_IP} 8443 -w 5
       
       # Копирование сертификатов
