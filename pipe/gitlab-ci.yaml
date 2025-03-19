@@ -179,55 +179,27 @@ deploy:
 #      alias: docker-host
 #      command: ["--tls=false", "--host=tcp://0.0.0.0:2375"]
   before_script:
-    - apk add --no-cache openssh-client rsync docker-cli curl
-    - curl -LO "https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
-    - install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-    - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - ssh-keyscan -p $SSH_PORT $SSH_HOST >> ~/.ssh/known_hosts
-    - docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
+    - apk add --no-cache curl openssh-client docker-cli
+    - curl -LO "https://dl.k8s.io/release/v$KUBECTL_VERSION/bin/linux/amd64/kubectl"
+    - chmod +x kubectl && mv kubectl /usr/local/bin/
+    - eval $(minikube docker-env)
   script:
-    - |
-      # Сборка и публикация образов
-      docker build -t $DOCKERHUB_NAMESPACE/messenger:1.0 -f Dockerfile.back .
-      docker push $DOCKERHUB_NAMESPACE/messenger:1.0
-      
-      docker build -t $DOCKERHUB_NAMESPACE/frontend:1.0 -f messenger-frontend/Dockerfile.front ./messenger-frontend
-      docker push $DOCKERHUB_NAMESPACE/frontend:1.0
-      
-      docker build -t $DOCKERHUB_NAMESPACE/telegram-bot:1.0 -f Telegram_bot/Dockerfile.bot ./Telegram_bot
-      docker push $DOCKERHUB_NAMESPACE/telegram-bot:1.0
-      ssh -p $SSH_PORT $SSH_USER@$SSH_HOST "
-        set -e
-        docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
-      
-      # Настройка доступа Minikube к Docker Hub
-        kubectl create secret docker-registry dockerhub-secret \
-          --docker-server=$DOCKERHUB_REGISTRY \
-          --docker-username=$DOCKERHUB_USERNAME \
-          --docker-password=$DOCKERHUB_PASSWORD \
-          --dry-run=client -o yaml | kubectl apply -f -
-        
-        # Применение манифестов с Docker Hub образами
-        kubectl apply -f /home/deep/docker-compose --namespace=messenger
-        
-        kubectl wait --for=condition=available \
-          --timeout=300s \
-          deployment/messenger-back \
-          deployment/app \
-          deployment/bot \
-          -n messenger
-        
-        # Проверка статуса
-        kubectl rollout status deployment/messenger-back --namespace=messenger --timeout=180s
-        kubectl rollout status deployment/app --namespace=messenger --timeout=180s
-        kubectl rollout status deployment/bot --namespace=messenger --timeout=180s
-        
-        # Финальная проверка
-        kubectl get pods,svc,ing -n messenger
-        echo "✅ Deployment successful!"
+    - echo "🔄 Сборка и загрузка образов в локальный Minikube"
+    - docker build -t messenger:1.0 -f Dockerfile.back .
+    - docker build -t frontend:1.0 -f messenger-frontend/Dockerfile.front ./messenger-frontend
+    - docker build -t telegram-bot:1.0 -f Telegram_bot/Dockerfile.bot ./Telegram_bot
+
+    - echo "🚀 Деплой в Kubernetes"
+    - kubectl create namespace messenger --dry-run=client -o yaml | kubectl apply -f -
+    - kubectl apply -f k8s/
+
+    - echo "⏳ Ожидание готовности подов"
+    - kubectl wait --for=condition=available --timeout=300s deployment/messenger-back -n messenger
+    - kubectl wait --for=condition=available --timeout=300s deployment/app -n messenger
+    - kubectl wait --for=condition=available --timeout=300s deployment/bot -n messenger
+
+    - echo "✅ Деплой завершён!"
+    - kubectl get pods,svc,ing -n messenger
   #needs: [ "backend-build", "frontend-build", "bot-build" ]
   # dependencies:
   #   - backend-build
