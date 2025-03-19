@@ -180,10 +180,8 @@ deploy:
     - apk add --no-cache curl kubectl
     - mkdir -p /root/.kube /root/.minikube/profiles/minikube
     - |
-      echo "Добавляем запись в /etc/hosts"
-      echo "${MINIKUBE_IP} minikube-host" >> /etc/hosts
-      ping -c 3 minikube-host
-      nc -zv minikube-host 8443 -w 5
+      ping -c ${MINIKUBE_IP} 3 
+      # nc -zv ${MINIKUBE_IP} 8443 -w 5
       
       # Копирование сертификатов
       echo "$CA_CRT" | base64 -d > /root/.minikube/ca.crt
