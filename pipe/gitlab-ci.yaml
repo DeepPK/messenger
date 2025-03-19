@@ -180,28 +180,34 @@ deploy:
   before_script:
     - apk add --no-cache curl kubectl
     - mkdir -p /root/.kube /root/.minikube/profiles/minikube
+    - |
     # Копирование сертификатов
-    - echo "$CA_CRT" | base64 -d > /root/.minikube/ca.crt
-    - echo "$CLIENT_CRT" | base64 -d > /root/.minikube/profiles/minikube/client.crt
-    - echo "$CLIENT_KEY" | base64 -d > /root/.minikube/profiles/minikube/client.key
-    - chmod 600 /root/.minikube/profiles/minikube/*
+      echo "$CA_CRT" | base64 -d > /root/.minikube/ca.crt
+      echo "$CLIENT_CRT" | base64 -d > /root/.minikube/profiles/minikube/client.crt
+      echo "$CLIENT_KEY" | base64 -d > /root/.minikube/profiles/minikube/client.key
+      chmod 600 /root/.minikube/profiles/minikube/*
 
     # Настройка kubectl
-    - kubectl config set-cluster minikube \
+      kubectl config set-cluster minikube \
         --server=https://${MINIKUBE_IP}:8443 \
-        --certificate-authority=/root/.minikube/ca.crt
-    - kubectl config set-credentials minikube \
+        --certificate-authority=/root/.minikube/ca.crt \
+        --embed-certs=true
+
+      kubectl config set-credentials minikube \
         --client-certificate=/root/.minikube/profiles/minikube/client.crt \
-        --client-key=/root/.minikube/profiles/minikube/client.key
-    - kubectl config set-context minikube \
+        --client-key=/root/.minikube/profiles/minikube/client.key \
+        --embed-certs=true
+    
+      kubectl config set-context minikube \
         --cluster=minikube \
         --user=minikube \
         --namespace=messenger
-    - kubectl config use-context minikube
+    
+      kubectl config use-context minikube
     # Проверка подключения
-    - kubectl cluster-info
-    - kubectl get nodes
-    - docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
+      kubectl cluster-info
+      kubectl get nodes
+      docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
   script:
     - |
       # Сборка и публикация образов
