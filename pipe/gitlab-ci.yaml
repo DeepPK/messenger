@@ -173,12 +173,15 @@ deploy:
 #    DOCKER_TLS_CERTDIR: ""
     KUBECONFIG: "/root/.kube/config"
     SSH_PORT: 22
+    KUBECTL_VERSION: "1.29.2"
 #  services:
 #    - name: docker:dind
 #      alias: docker-host
 #      command: ["--tls=false", "--host=tcp://0.0.0.0:2375"]
   before_script:
-    - apk add --no-cache openssh-client rsync docker-cli kubectl
+    - apk add --no-cache openssh-client rsync docker-cli curl
+    - curl -LO "https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+    - install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
