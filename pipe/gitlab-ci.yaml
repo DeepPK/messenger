@@ -1,5 +1,5 @@
 stages:
-  - build
+  #- build
   #- test
   #- sonar-check
   - deploy
@@ -33,19 +33,19 @@ cache:
     - target/site/jacoco/
 
  #------------------------- BACKEND -------------------------
-backend-build:
- image: maven:3.8.6-openjdk-18
- stage: build
- tags:
-   - messenger
- script:
-   - cd "${BACKEND_DIR}"
-   - mvn ${MAVEN_CLI_OPTS} clean package -DskipTests
- artifacts:
-   paths:
-     - target/classes/
-     - target/*.jar
-   expire_in: 1 day
+#backend-build:
+# image: maven:3.8.6-openjdk-18
+# stage: build
+# tags:
+#   - messenger
+# script:
+#   - cd "${BACKEND_DIR}"
+#   - mvn ${MAVEN_CLI_OPTS} clean package -DskipTests
+# artifacts:
+#   paths:
+#     - target/classes/
+#     - target/*.jar
+#   expire_in: 1 day
 
 #backend-test:
 # image: maven:3.8.6-openjdk-18
@@ -70,20 +70,20 @@ backend-build:
 #       - "${REPORTS_DIR}/TEST-*.xml"
 
 # ------------------------- FRONTEND -----------------------
-frontend-build:
- image: node:${NODE_VERSION}-alpine
- stage: build
- tags:
-   - messenger
- script:
-   - cd "${FRONTEND_DIR}"
-   - npm ci ${NPM_CI_OPTS}
-   - npm run build
- artifacts:
-   paths:
-     - messenger-frontend/node_modules/
-     - messenger-frontend/build/
-   expire_in: 1 day
+#frontend-build:
+# image: node:${NODE_VERSION}-alpine
+# stage: build
+# tags:
+#   - messenger
+# script:
+#   - cd "${FRONTEND_DIR}"
+#   - npm ci ${NPM_CI_OPTS}
+#   - npm run build
+# artifacts:
+#   paths:
+#     - messenger-frontend/node_modules/
+#     - messenger-frontend/build/
+#   expire_in: 1 day
 
 #frontend-test:
 # image: node:${NODE_VERSION}-alpine
@@ -118,21 +118,21 @@ frontend-build:
 #     junit: "${REPORTS_DIR}/frontend-junit.xml"
 
 
-bot-build:
-  stage: build
-  image: python:3.10-alpine
-  tags:
-    - messenger
-  variables:
-    BOT_DIR: "${PROJECT_ROOT}/Telegram_bot"
-  script:
-    - cd "${BOT_DIR}"
-    - ls -la "${BOT_DIR}"
-    - pip install -r requirements.txt
-  artifacts:
-    paths:
-      - Telegram_bot/
-    expire_in: 1 day
+#bot-build:
+#  stage: build
+#  image: python:3.10-alpine
+#  tags:
+#    - messenger
+#  variables:
+#    BOT_DIR: "${PROJECT_ROOT}/Telegram_bot"
+#  script:
+#    - cd "${BOT_DIR}"
+#    - ls -la "${BOT_DIR}"
+#    - pip install -r requirements.txt
+#  artifacts:
+#    paths:
+#      - Telegram_bot/
+#    expire_in: 1 day
 
 # ------------------------- SONARQUBE ANALYSIS -------------------------
 #sonar-check:
@@ -182,11 +182,14 @@ deploy:
     - apk add --no-cache curl kubectl
     - curl -k https://${MINIKUBE_IP}:8443/version
     - mkdir -p /root/.kube /root/.minikube/profiles/minikube
+    - ping -c 3 ${MINIKUBE_IP}
+    - nc -zv ${MINIKUBE_IP} 8443
     # Копирование сертификатов
     - echo "$CA_CRT" | base64 -d > /root/.minikube/ca.crt
     - echo "$CLIENT_CRT" | base64 -d > /root/.minikube/profiles/minikube/client.crt
     - echo "$CLIENT_KEY" | base64 -d > /root/.minikube/profiles/minikube/client.key
     - chmod 600 /root/.minikube/profiles/minikube/*
+
     # Настройка kubectl
     - kubectl config set-cluster minikube \
         --server=https://${MINIKUBE_IP}:8443 \
@@ -201,6 +204,7 @@ deploy:
     - kubectl config use-context minikube
     # Проверка подключения
     - kubectl cluster-info
+    - kubectl get nodes
     - docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
   script:
     - |
@@ -224,11 +228,23 @@ deploy:
       # Применение манифестов с Docker Hub образами
       kubectl apply -f cloud/cloud-terraform/minicube-manifest/
       
+      kubectl wait --for=condition=available \
+        --timeout=300s \
+        deployment/messenger-back \
+        deployment/app \
+        deployment/bot \
+        -n messenger
+      
       # Проверка статуса
       kubectl rollout status deployment/messenger-back --timeout=180s
       kubectl rollout status deployment/app --timeout=180s
       kubectl rollout status deployment/bot --timeout=180s
       
       # Финальная проверка
-      kubectl get pods -n messenger
-  needs: ["backend-build", "frontend-build", "bot-build"]
+      kubectl get pods,svc,ing -n messenger
+      echo "✅ Deployment successful!"
+  needs: [ "backend-build", "frontend-build", "bot-build" ]
+  dependencies:
+    - backend-build
+    - frontend-build
+    - bot-build
