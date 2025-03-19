@@ -185,13 +185,13 @@ deploy:
       ping -c 3 ${MINIKUBE_IP} || echo "Ping test failed"
       nc -zv ${MINIKUBE_IP} 8443 -w 5 || echo "Port check failed"
       curl -k https://${MINIKUBE_IP}:8443/version || echo "API check failed"
-    # Копирование сертификатов
+      # Копирование сертификатов
       echo "$CA_CRT" | base64 -d > /root/.minikube/ca.crt
       echo "$CLIENT_CRT" | base64 -d > /root/.minikube/profiles/minikube/client.crt
       echo "$CLIENT_KEY" | base64 -d > /root/.minikube/profiles/minikube/client.key
       chmod 600 /root/.minikube/profiles/minikube/*
 
-    # Настройка kubectl
+      # Настройка kubectl
       kubectl config set-cluster minikube \
         --server=https://${MINIKUBE_IP}:8443 \
         --certificate-authority=/root/.minikube/ca.crt \
@@ -208,7 +208,7 @@ deploy:
         --namespace=messenger
     
       kubectl config use-context minikube
-    # Проверка подключенияу
+      # Проверка подключенияу
       kubectl cluster-info
       kubectl get nodes
       docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
