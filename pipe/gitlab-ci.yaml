@@ -182,12 +182,8 @@ deploy:
     - |
       echo "Добавляем запись в /etc/hosts"
       echo "${MINIKUBE_IP} minikube-host" >> /etc/hosts
-      ping -c 3 minikube-host
-      
-      echo "Проверка сетевой доступности:"
-      ping -c 3 ${MINIKUBE_IP} || echo "Ping test failed"
-      nc -zv ${MINIKUBE_IP} 8443 -w 5 || echo "Port check failed"
-      curl -k https://${MINIKUBE_IP}:8443/version || echo "API check failed"
+      - ping -c 3 minikube-host
+      - nc -zv minikube-host 8443 -w 5
       
       # Копирование сертификатов
       echo "$CA_CRT" | base64 -d > /root/.minikube/ca.crt
