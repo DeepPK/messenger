@@ -182,8 +182,8 @@ deploy:
     - |
       echo "Добавляем запись в /etc/hosts"
       echo "${MINIKUBE_IP} minikube-host" >> /etc/hosts
-      - ping -c 3 minikube-host
-      - nc -zv minikube-host 8443 -w 5
+      ping -c 3 minikube-host
+      nc -zv minikube-host 8443 -w 5
       
       # Копирование сертификатов
       echo "$CA_CRT" | base64 -d > /root/.minikube/ca.crt
