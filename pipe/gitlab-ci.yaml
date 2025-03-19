@@ -186,7 +186,6 @@ deploy:
     - sed -i "s/server:.*/server: https:\/\/${MINIKUBE_IP}:8443/" $KUBECONFIG
     - kubectl config use-context minikube
     - kubectl cluster-info
-
   script:
     - echo "🔄 Сборка и загрузка образов"
 #    - docker buildx create --use
