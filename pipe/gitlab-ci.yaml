@@ -167,6 +167,7 @@ deploy:
   tags:
     - dep
   variables:
+    MINIKUBE_IP: "192.168.49.2"
     DOCKERHUB_REGISTRY: "docker.io"
     DOCKERHUB_NAMESPACE: "deepk10"
     DOCKER_HOST: tcp://docker-host:2375
@@ -179,6 +180,27 @@ deploy:
       command: ["--tls=false", "--host=tcp://0.0.0.0:2375"]
   before_script:
     - apk add --no-cache curl kubectl
+    - curl -k https://${MINIKUBE_IP}:8443/version
+    - mkdir -p /root/.kube /root/.minikube/profiles/minikube
+    # Копирование сертификатов
+    - echo "$CA_CRT" | base64 -d > /root/.minikube/ca.crt
+    - echo "$CLIENT_CRT" | base64 -d > /root/.minikube/profiles/minikube/client.crt
+    - echo "$CLIENT_KEY" | base64 -d > /root/.minikube/profiles/minikube/client.key
+    - chmod 600 /root/.minikube/profiles/minikube/*
+    # Настройка kubectl
+    - kubectl config set-cluster minikube \
+        --server=https://${MINIKUBE_IP}:8443 \
+        --certificate-authority=/root/.minikube/ca.crt
+    - kubectl config set-credentials minikube \
+        --client-certificate=/root/.minikube/profiles/minikube/client.crt \
+        --client-key=/root/.minikube/profiles/minikube/client.key
+    - kubectl config set-context minikube \
+        --cluster=minikube \
+        --user=minikube \
+        --namespace=messenger
+    - kubectl config use-context minikube
+    # Проверка подключения
+    - kubectl cluster-info
     - docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
   script:
     - |
@@ -189,8 +211,8 @@ deploy:
       docker build -t $DOCKERHUB_NAMESPACE/frontend:1.0 -f messenger-frontend/Dockerfile.front ./messenger-frontend
       docker push $DOCKERHUB_NAMESPACE/frontend:1.0
       
-      docker build -t $DOCKERHUB_NAMESPACE/bot:1.0 -f Telegram_bot/Dockerfile.bot ./Telegram_bot
-      docker push $DOCKERHUB_NAMESPACE/bot:1.0
+      docker build -t $DOCKERHUB_NAMESPACE/telegram-bot:1.0 -f Telegram_bot/Dockerfile.bot ./Telegram_bot
+      docker push $DOCKERHUB_NAMESPACE/telegram-bot:1.0
       
       # Настройка доступа Minikube к Docker Hub
       kubectl create secret docker-registry dockerhub-secret \
@@ -208,7 +230,5 @@ deploy:
       kubectl rollout status deployment/bot --timeout=180s
       
       # Финальная проверка
-      kubectl get all,ingress -n messenger
-      echo "✅ Deployment successful!"
-
+      kubectl get pods -n messenger
   needs: ["backend-build", "frontend-build", "bot-build"]
