@@ -174,12 +174,19 @@ deploy:
     DOCKER_HOST: tcp://docker-host:2375
     DOCKER_TLS_CERTDIR: ""
     KUBECTL_VERSION: "1.29.2"
+    MINIKUBE_IP: "192.168.49.2"  # Замените на реальный IP вашего Minikube
 
   before_script:
-    - apk add --no-cache curl openssh-client bash
+    - apk add --no-cache curl openssh-client bash git
+    # Установка kubectl
     - curl -LO "https://dl.k8s.io/release/v$KUBECTL_VERSION/bin/linux/amd64/kubectl"
     - chmod +x kubectl && mv kubectl /usr/local/bin/
-    - docker info
+    # Настройка доступа к Minikube
+    - mkdir -p /root/.kube
+    - echo "$KUBECONFIG_CONTENT" > $KUBECONFIG
+    - sed -i "s/server:.*/server: https:\/\/${MINIKUBE_IP}:8443/" $KUBECONFIG
+    - kubectl config use-context minikube
+    - kubectl cluster-info
 
   script:
     - echo "🔄 Сборка и загрузка образов"
@@ -189,6 +196,7 @@ deploy:
 #    - docker build -t telegram-bot:1.0 -f Telegram_bot/Dockerfile.bot ./Telegram_bot
 
     - echo "🚀 Деплой в Kubernetes"
+    - eval $(minikube -p minikube docker-env --shell bash)
     - kubectl create namespace messenger --dry-run=client -o yaml | kubectl apply -f -
     - kubectl apply -f /home/deep/docker-compose
 
