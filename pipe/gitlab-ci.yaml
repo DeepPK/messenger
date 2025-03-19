@@ -183,14 +183,14 @@ deploy:
 
   script:
     - echo "🔄 Сборка и загрузка образов"
-    - docker buildx create --use
-    - docker build -t messenger:1.0 -f Dockerfile.back .
-    - docker build -t frontend:1.0 -f messenger-frontend/Dockerfile.front ./messenger-frontend
-    - docker build -t telegram-bot:1.0 -f Telegram_bot/Dockerfile.bot ./Telegram_bot
+#    - docker buildx create --use
+#    - docker build -t messenger:1.0 -f Dockerfile.back .
+#    - docker build -t frontend:1.0 -f messenger-frontend/Dockerfile.front ./messenger-frontend
+#    - docker build -t telegram-bot:1.0 -f Telegram_bot/Dockerfile.bot ./Telegram_bot
 
     - echo "🚀 Деплой в Kubernetes"
     - kubectl create namespace messenger --dry-run=client -o yaml | kubectl apply -f -
-    - kubectl apply -f k8s/
+    - kubectl apply -f /home/deep/docker-compose
 
     - echo "⏳ Ожидание готовности подов"
     - kubectl wait --for=condition=available --timeout=300s deployment/messenger-back -n messenger
