@@ -163,28 +163,27 @@ cache:
 
 deploy:
   stage: deploy
-  image: alpine:3.18
+  image: docker:24.0.7
   tags:
     - dep
+  services:
+    - name: docker:dind
+      alias: docker-host
   variables:
-#    DOCKERHUB_REGISTRY: "docker.io"
-#    DOCKERHUB_NAMESPACE: "deepk10"
-#    DOCKER_HOST: tcp://docker-host:2375
-#    DOCKER_TLS_CERTDIR: ""
     KUBECONFIG: "/root/.kube/config"
-    SSH_PORT: 22
+    DOCKER_HOST: tcp://docker-host:2375
+    DOCKER_TLS_CERTDIR: ""
     KUBECTL_VERSION: "1.29.2"
-#  services:
-#    - name: docker:dind
-#      alias: docker-host
-#      command: ["--tls=false", "--host=tcp://0.0.0.0:2375"]
+
   before_script:
-    - apk add --no-cache curl openssh-client docker-cli
+    - apk add --no-cache curl openssh-client bash
     - curl -LO "https://dl.k8s.io/release/v$KUBECTL_VERSION/bin/linux/amd64/kubectl"
     - chmod +x kubectl && mv kubectl /usr/local/bin/
-    - eval $(minikube docker-env)
+    - docker info
+
   script:
-    - echo "🔄 Сборка и загрузка образов в локальный Minikube"
+    - echo "🔄 Сборка и загрузка образов"
+    - docker buildx create --use
     - docker build -t messenger:1.0 -f Dockerfile.back .
     - docker build -t frontend:1.0 -f messenger-frontend/Dockerfile.front ./messenger-frontend
     - docker build -t telegram-bot:1.0 -f Telegram_bot/Dockerfile.bot ./Telegram_bot
