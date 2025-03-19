@@ -180,8 +180,6 @@ deploy:
   before_script:
     - apk add --no-cache curl kubectl
     - mkdir -p /root/.kube /root/.minikube/profiles/minikube
-    - ping -c 3 ${MINIKUBE_IP}
-    - nc -zv ${MINIKUBE_IP} 8443
     # Копирование сертификатов
     - echo "$CA_CRT" | base64 -d > /root/.minikube/ca.crt
     - echo "$CLIENT_CRT" | base64 -d > /root/.minikube/profiles/minikube/client.crt
